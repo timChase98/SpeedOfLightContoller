@@ -1,0 +1,15 @@
+"Qty";"Value";"Device";"Package";"Parts";"Description";"POPULARITY";"SPICEPREFIX";
+"9";"";"DIODESOD-123";"SOD-123";"D1, D2, D3, D4, D5, D6, D7, D8, D9";"Diode";"";"";
+"6";"";"MOSFET-NREFLOW";"SOT23";"Q2, Q3, Q6, Q7, Q8, Q9";"N-Channel Mosfet";"";"";
+"1";"0.1uF";"C-EUC0805";"C0805";"C1";"CAPACITOR, European symbol";"88";"C";
+"9";"10K";"R-EU_R0805";"R0805";"R3, R4, R8, R11, R12, R13, R14, R16, R18";"RESISTOR, European symbol";"86";"R";
+"9";"1K";"R-EU_R0805";"R0805";"R1, R2, R5, R6, R7, R9, R10, R15, R17";"RESISTOR, European symbol";"86";"R";
+"1";"74HC595D";"74HC595D";"SO16";"IC1";"8-bit SHIFT REGISTER, output latch";"21";"";
+"3";"FDN360P";"FDN360P";"SUPER-SOT3";"Q1, Q4, Q5";"Single P-Channel, PowerTrench (R) MOSFET";"2";"";
+"2";"FIDUCIAL";"FIDUCIAL";"FIDUCIAL_1MM";"F1, F2";"For use by pick and place machines to calibrate the vision/machine, 1mm";"";"";
+"1";"JST-XH-02-PIN-LONG-PAD";"JST-XH-02-PIN-LONG-PAD";"JST-XH-02-PACKAGE-LONG-PAD";"X1";"JST XH Connector 2 Pin";"";"";
+"1";"JST-XH-03-PIN-LONG-PAD";"JST-XH-03-PIN-LONG-PAD";"JST-XH-03-PACKAGE-LONG-PAD";"X4";"JST XH Connector 2 Pin";"";"";
+"9";"JST-XH-04-PIN-LONG-PAD";"JST-XH-04-PIN-LONG-PAD";"JST-XH-04-PACKAGE-LONG-PAD";"X5, X6, X7, X8, X9, X10, X11, X12, X13";"JST XH Connector 2 Pin";"";"";
+"1";"JST-XH-06-PIN-LONG-PAD";"JST-XH-06-PIN-LONG-PAD";"JST-XH-06-PACKAGE-LONG-PAD";"X14";"JST XH Connector 2 Pin";"";"";
+"2";"JST-XH-07-PIN-LONG-PAD";"JST-XH-07-PIN-LONG-PAD";"JST-XH-07-PACKAGE-LONG-PAD";"X2, X3";"JST XH Connector 2 Pin";"";"";
+"2";"MOUNT-HOLE3.6";"MOUNT-HOLE3.6";"3,6";"H1, H2";"MOUNTING HOLE with drill center marker";"2";"";
