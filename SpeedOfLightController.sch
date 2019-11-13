@@ -21439,7 +21439,11 @@ For reference (or to suit your programming needs) check out these designs:
 <variantdefs>
 </variantdefs>
 <classes>
-<class number="0" name="default" width="0" drill="0">
+<class number="0" name="default" width="0.2032" drill="0.381">
+<clearance class="0" value="0.2032"/>
+</class>
+<class number="1" name="power" width="0.254" drill="0.381">
+<clearance class="1" value="0.254"/>
 </class>
 </classes>
 <parts>
@@ -21587,7 +21591,7 @@ For reference (or to suit your programming needs) check out these designs:
 <part name="R39" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="1K"/>
 <part name="R42" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="10K"/>
 <part name="SUPPLY38" library="supply2" library_urn="urn:adsk.eagle:library:372" deviceset="GND" device=""/>
-<part name="SW1" library="ECE388" deviceset="MOMENTARYBUTTON" device=""/>
+<part name="RESET" library="ECE388" deviceset="MOMENTARYBUTTON" device=""/>
 <part name="ISP1" library="ECE388" deviceset="AVRISP" device="-6"/>
 <part name="FRAME4" library="frames" library_urn="urn:adsk.eagle:library:229" deviceset="LETTER_L" device=""/>
 <part name="U2" library="tmc" deviceset="LM380N" device="DIP14" package3d_urn="urn:adsk.eagle:package:14879978/1"/>
@@ -21720,8 +21724,8 @@ For reference (or to suit your programming needs) check out these designs:
 <part name="U$1" library="tmc" deviceset="USBMICRO" device=""/>
 <part name="H1" library="holes" library_urn="urn:adsk.eagle:library:237" deviceset="MOUNT-HOLE" device="3.0" package3d_urn="urn:adsk.eagle:package:14277/1"/>
 <part name="H2" library="holes" library_urn="urn:adsk.eagle:library:237" deviceset="MOUNT-HOLE" device="3.0" package3d_urn="urn:adsk.eagle:package:14277/1"/>
-<part name="SJ4" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="SJ2W" device="W" package3d_urn="urn:adsk.eagle:package:15476/1"/>
-<part name="SJ5" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="SJ2W" device="W" package3d_urn="urn:adsk.eagle:package:15476/1"/>
+<part name="SJ4" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="SJ2W" device="" package3d_urn="urn:adsk.eagle:package:15474/1"/>
+<part name="SJ5" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="SJ2W" device="" package3d_urn="urn:adsk.eagle:package:15474/1"/>
 <part name="U3" library="tmc" deviceset="SSM2305" device="ADMSOP8_2" package3d_urn="urn:adsk.eagle:package:15052407/1"/>
 <part name="SJ6" library="ECE388" deviceset="SJ" device=""/>
 </parts>
@@ -21890,7 +21894,7 @@ For reference (or to suit your programming needs) check out these designs:
 <attribute name="NAME" x="110.744" y="132.461" size="1.778" layer="95"/>
 <attribute name="VALUE" x="110.744" y="140.081" size="1.778" layer="96"/>
 </instance>
-<instance part="SW1" gate="G$1" x="96.52" y="119.38" smashed="yes"/>
+<instance part="RESET" gate="G$1" x="96.52" y="119.38" smashed="yes"/>
 <instance part="ISP1" gate="G$1" x="33.02" y="35.56" smashed="yes">
 <attribute name="NAME" x="38.1" y="40.64" size="1.778" layer="95"/>
 </instance>
@@ -22046,7 +22050,7 @@ For reference (or to suit your programming needs) check out these designs:
 <wire x1="144.78" y1="127" x2="144.78" y2="124.46" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="SW1" gate="G$1" pin="A1"/>
+<pinref part="RESET" gate="G$1" pin="A1"/>
 <pinref part="SUPPLY4" gate="GND" pin="GND"/>
 <wire x1="99.06" y1="124.46" x2="93.98" y2="124.46" width="0.1524" layer="91"/>
 <wire x1="93.98" y1="124.46" x2="93.98" y2="119.38" width="0.1524" layer="91"/>
@@ -22304,15 +22308,15 @@ For reference (or to suit your programming needs) check out these designs:
 <pinref part="X3" gate="-5" pin="S"/>
 </segment>
 <segment>
-<wire x1="193.04" y1="142.24" x2="210.82" y2="142.24" width="0.1524" layer="91"/>
-<label x="203.2" y="142.24" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="PB2"/>
-</segment>
-<segment>
 <pinref part="R2" gate="G$1" pin="1"/>
 <wire x1="88.9" y1="165.1" x2="88.9" y2="160.02" width="0.1524" layer="91"/>
 <wire x1="88.9" y1="160.02" x2="71.12" y2="160.02" width="0.1524" layer="91"/>
 <label x="71.12" y="160.02" size="1.778" layer="95"/>
+</segment>
+<segment>
+<wire x1="193.04" y1="99.06" x2="210.82" y2="99.06" width="0.1524" layer="91"/>
+<pinref part="U1" gate="G$1" pin="PE3"/>
+<label x="203.2" y="99.06" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="LED_O" class="0">
@@ -22394,9 +22398,9 @@ For reference (or to suit your programming needs) check out these designs:
 <label x="91.44" y="162.56" size="1.778" layer="95"/>
 </segment>
 <segment>
-<wire x1="193.04" y1="99.06" x2="210.82" y2="99.06" width="0.1524" layer="91"/>
-<pinref part="U1" gate="G$1" pin="PE3"/>
-<label x="198.12" y="99.06" size="1.778" layer="95"/>
+<wire x1="193.04" y1="142.24" x2="210.82" y2="142.24" width="0.1524" layer="91"/>
+<label x="198.12" y="142.24" size="1.778" layer="95"/>
+<pinref part="U1" gate="G$1" pin="PB2"/>
 </segment>
 </net>
 <net name="UC_RESET" class="0">
@@ -22415,7 +22419,7 @@ For reference (or to suit your programming needs) check out these designs:
 <label x="116.84" y="137.16" size="1.778" layer="95"/>
 <wire x1="132.08" y1="137.16" x2="116.84" y2="137.16" width="0.1524" layer="91"/>
 <pinref part="C1" gate="G$1" pin="1"/>
-<pinref part="SW1" gate="G$1" pin="B1"/>
+<pinref part="RESET" gate="G$1" pin="B1"/>
 <wire x1="119.38" y1="124.46" x2="137.16" y2="124.46" width="0.1524" layer="91"/>
 <wire x1="137.16" y1="124.46" x2="137.16" y2="137.16" width="0.1524" layer="91"/>
 </segment>
@@ -22497,16 +22501,16 @@ For reference (or to suit your programming needs) check out these designs:
 </net>
 <net name="UCD-" class="0">
 <segment>
-<pinref part="U1" gate="G$1" pin="PE1"/>
-<wire x1="193.04" y1="104.14" x2="210.82" y2="104.14" width="0.1524" layer="91"/>
-<label x="205.74" y="104.14" size="1.778" layer="95"/>
+<pinref part="U1" gate="G$1" pin="PE0"/>
+<wire x1="193.04" y1="106.68" x2="210.82" y2="106.68" width="0.1524" layer="91"/>
+<label x="205.74" y="106.68" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="UCD+" class="0">
 <segment>
-<pinref part="U1" gate="G$1" pin="PE0"/>
-<wire x1="193.04" y1="106.68" x2="210.82" y2="106.68" width="0.1524" layer="91"/>
-<label x="205.74" y="106.68" size="1.778" layer="95"/>
+<pinref part="U1" gate="G$1" pin="PE1"/>
+<wire x1="193.04" y1="104.14" x2="210.82" y2="104.14" width="0.1524" layer="91"/>
+<label x="205.74" y="104.14" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>
@@ -24398,7 +24402,7 @@ for display anodes</text>
 <pinref part="Q5" gate="G$1" pin="D"/>
 </segment>
 </net>
-<net name="+12V" class="0">
+<net name="+12V" class="1">
 <segment>
 <pinref part="R13" gate="G$1" pin="2"/>
 <pinref part="P+12" gate="1" pin="+12V"/>
@@ -25624,7 +25628,7 @@ for daughter boards</text>
 <junction x="149.86" y="48.26"/>
 </segment>
 </net>
-<net name="+12V" class="0">
+<net name="+12V" class="1">
 <segment>
 <pinref part="SJ2" gate="G$1" pin="3"/>
 <wire x1="48.26" y1="50.8" x2="30.48" y2="50.8" width="0.1524" layer="91"/>
@@ -25767,7 +25771,7 @@ for daughter boards</text>
 <pinref part="U$1" gate="G$1" pin="ID"/>
 </segment>
 </net>
-<net name="N$19" class="0">
+<net name="N$19" class="1">
 <segment>
 <pinref part="JP5" gate="A" pin="1"/>
 <wire x1="43.18" y1="160.02" x2="27.94" y2="160.02" width="0.1524" layer="91"/>
