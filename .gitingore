@@ -10,8 +10,8 @@
 # only prefixed by an `at`.
 
 #Build Directories
-[Dd]ebug/
-[Rr]elease/
+sw/[Dd]ebug/
+sw/[Rr]elease/
 
 #Build Results
 *.o
