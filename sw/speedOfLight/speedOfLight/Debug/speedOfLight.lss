@@ -1,5 +1,5 @@
 
-388SpeedOfLight.elf:     file format elf32-avr
+speedOfLight.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
@@ -23,11 +23,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
   9 .debug_frame  00000180  00000000  00000000  000025b8  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    0000058f  00000000  00000000  00002738  2**0
+ 10 .debug_str    000005a2  00000000  00000000  00002738  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00000457  00000000  00000000  00002cc7  2**0
+ 11 .debug_loc    00000457  00000000  00000000  00002cda  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000078  00000000  00000000  0000311e  2**0
+ 12 .debug_ranges 00000078  00000000  00000000  00003131  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -471,7 +471,7 @@ ISR(TIMER3_COMPA_vect){
  384:	80 93 28 01 	sts	0x0128, r24	; 0x800128 <scoreDigitCounter>
 	
 
-	// clear contents of shift register and latch 
+	// clear contents of shift register and latch
 	PORTB &= ~(1 << LED_L); // set led latch low
  388:	28 98       	cbi	0x05, 0	; 5
 	PORTB &= ~(1 << LED_B); // blank leds

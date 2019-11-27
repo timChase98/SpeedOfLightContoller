@@ -539,13 +539,13 @@ END GROUP
  .debug_frame   0x00000000      0x11c main.o
  .debug_frame   0x0000011c       0x64 ubsQc.o
 
-.debug_str      0x00000000      0x58f
+.debug_str      0x00000000      0x5a2
  *(.debug_str)
  .debug_str     0x00000000      0x318 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega328pb/avr5/crtatmega328pb.o
- .debug_str     0x00000318      0x24c main.o
-                                0x280 (size before relaxing)
- .debug_str     0x00000564       0x2b ubsQc.o
-                                0x1c3 (size before relaxing)
+ .debug_str     0x00000318      0x25f main.o
+                                0x293 (size before relaxing)
+ .debug_str     0x00000577       0x2b ubsQc.o
+                                0x1d6 (size before relaxing)
 
 .debug_loc      0x00000000      0x457
  *(.debug_loc)
@@ -577,5 +577,5 @@ END GROUP
 
 .debug_macro
  *(.debug_macro)
-OUTPUT(388SpeedOfLight.elf elf32-avr)
+OUTPUT(speedOfLight.elf elf32-avr)
 LOAD linker stubs
