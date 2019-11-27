@@ -33,9 +33,9 @@
 
 	void usbQcInit();
 	void _handshake();
-	void set12V();
-	void set5V();
-	void set9V();
+	void QCset12V();
+	void QCset5V();
+	void QCset9V();
 
 
 

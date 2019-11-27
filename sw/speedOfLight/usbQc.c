@@ -10,7 +10,7 @@
 
 void usbQcInit(){
 	_handshake(); 
-	set5V(); 
+	QCset5V(); 
 }
 
 void _handshake(){
@@ -21,19 +21,19 @@ void _handshake(){
 	
 }
 
-void set5V(){
+void QCset5V(){
 	_dp600mV();
 	_dm0V();
 	
 }
 
-void set9V(){
+void QCset9V(){
 	_dp3V3();
 	_dm600mV();
 	
 }
 
-void set12V(){
+void QCset12V(){
 	_dp600mV();
 	_dm600mV();
 }
