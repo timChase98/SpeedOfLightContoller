@@ -28,18 +28,24 @@
 #define MultiplierDecaySeconds 1
 #define MultiplierDecayTicks 0	// TODO check that ticks change it
 
+#define AttractPatternCount 1
 
-#define EEP_ADDR_HighScore_H 0x00
-#define EEP_ADDR_HighScore_L 0x01
+//********************* eeprom locations for game vars
+
+#define EEP_ADDR_HighScore1P_H 0x00
+#define EEP_ADDR_HighScore1P_L 0x01
+
+#define EEP_ADDR_HighScore2P_H 0x02
+#define EEP_ADDR_HighScore2P_L 0x03
 
 #define EEP_ADDR_RoundTime 0x10
 #define EEP_ADDR_BonusTime 0x20
-#define EEP_ADDR_HighScore 0x30
 
 #define EEP_ADDR_RandomSeed_H 0x40
 #define EEP_ADDR_RandomSeed_L 0x41
 
 #define EEP_ADDR_MultMax 0x50
+#define EEP_ADDR_BonusPtCount 60
 
 
 //********************** def prototypes
@@ -48,7 +54,7 @@ uint8_t GameMode;			// controls next game mode (0 for 1p, 1 for 2p)
 uint8_t RoundTime;
 uint8_t BonusTime;
 volatile uint8_t TimeRemaining;
-uint16_t HighScore;
+uint16_t HighScore1P, HighScore2P;
 
 uint8_t gameledsX[6];
 uint8_t gameledsY[6];
@@ -58,7 +64,7 @@ uint8_t P1Multiplier, P2Multiplier;
 uint8_t P1MultTimeS, P2MultTimeS;		// for multiplier decay keep track of seconds
 uint16_t P1MultTimeT, P2MultTimeT;		// as well as "sub-seconds" (timer ticks)
 uint8_t MultiplierMax;
-
+uint8_t BonusPointCount;
 
 volatile uint16_t beep_index = 0;
 volatile uint16_t note_index = 0;
@@ -71,8 +77,8 @@ void Bonus();
 void Attractive();
 uint8_t AttractCheckGameStart(uint16_t count);
 
+void ShowWinner();
 void playChirp(uint8_t);
-
 void checkMultiplers();
 void IncrementScore(uint8_t, uint16_t);
 
@@ -105,10 +111,12 @@ int main(void)
 
 
 	//load values from eeprom
-	HighScore = (EEPROM_read(EEP_ADDR_HighScore_H) << 8) | (EEPROM_read(EEP_ADDR_HighScore_L));
+	HighScore1P = (EEPROM_read(EEP_ADDR_HighScore1P_H) << 8) | (EEPROM_read(EEP_ADDR_HighScore1P_L));
+	HighScore2P = (EEPROM_read(EEP_ADDR_HighScore2P_H) << 8) | (EEPROM_read(EEP_ADDR_HighScore2P_L));
 	RoundTime = EEPROM_read(EEP_ADDR_RoundTime);
 	BonusTime = EEPROM_read(EEP_ADDR_BonusTime);
 	MultiplierMax = EEPROM_read(EEP_ADDR_MultMax);
+	BonusPointCount = EEPROM_read(EEP_ADDR_BonusPtCount);
 	
 	// load random value from eeprom as seed and write new random value
 	srand((EEPROM_read(EEP_ADDR_RandomSeed_H) << 8) | EEPROM_read(EEP_ADDR_RandomSeed_L));
@@ -116,7 +124,7 @@ int main(void)
 	EEPROM_write(EEP_ADDR_RandomSeed_L, rand()%256 );
 	
 	
-							// set up timer4 for game timer
+	// set up timer4 for game timer
 	TCCR4A = (1 << WGM41);	// CTC mode
 	TCCR4B = 0;				// disable timer until game start (set to 64 prescale later in code)
 	TIMSK4 = (1 << OCIE4A);
@@ -128,7 +136,23 @@ int main(void)
 	{
 		Attractive();		// loop thru patterns until game start is pressed (TODO IMPLEMENT DEBUG PATTERN)
 		Game();
+		_delay_ms(750);
 		Bonus();
+		
+		if(GameMode == 0){
+			if(P1Score > HighScore1P){
+				HighScore1P = P1Score;
+				ShowWinner();			//if new high score, flash screen
+			}
+		}else{
+			if((P1Score > HighScore2P) || (P2Score > HighScore2P)){
+				HighScore2P = (P1Score > P2Score ? P1Score : P2Score);
+			}
+			ShowWinner();				//if 2 player mode show winner anyway
+		}
+		
+		_delay_ms(750);
+		
 
 	}
 }
@@ -172,7 +196,7 @@ ISR(TIMER4_COMPA_vect){		// use timer 4 for decreasing game time every 1s
 
 void Game(){
 
-							// game mode is set when leaving attract mode
+	// game mode is set when leaving attract mode
 	Display321();
 	
 	P1Score = 0;			// reset scores and multipliers
@@ -180,8 +204,8 @@ void Game(){
 	P1Multiplier = 1;
 	P2Multiplier = 1;
 
-							// pick 6 random leds to enable regardless of mode
-							// (3 left side 3 right side)
+	// pick 6 random leds to enable regardless of mode
+	// (3 left side 3 right side)
 	for(int i = 0; i < (MaxLedsOn / 2); i++){
 		gameledsX[i] = rand() % (LedsXMax / 2);			// turn 3 on left side
 		gameledsY[i] = rand() % 5;
@@ -195,7 +219,18 @@ void Game(){
 	TCNT4 = 0;					// reset timer
 	TCCR4B = (0b101 << CS40);	// enable timer 0 (game timer)
 	
-	while(TimeRemaining > 0){		
+	setScore(0, HighScore1P);	// will be replaced if 2p mode
+	
+	while(TimeRemaining > 0){
+
+		
+		setScore(1, TimeRemaining);
+		if(GameMode == 1){
+			setScore(0, P1Score);	// if 2p mode, show left p1 and right p2 scores
+			setScore(2, P2Score);
+			}else{
+			setScore(2, P1Score);	// otherwise show p1 score and high score
+		}
 
 		for(uint8_t i = 0; i < 6; i++){
 			if (isButtonDown(gameledsX[i], gameledsY[i]) ){
@@ -204,12 +239,12 @@ void Game(){
 				uint8_t oldY = gameledsY[i];
 
 				do{		// move led to random DIFFERENT spot
-					if(i >= 3){	
+					if(i >= 3){
 						gameledsX[i+3] = 3 + rand() % (LedsXMax / 2);
-					}else{
+						}else{
 						gameledsX[i] = rand() % (LedsXMax / 2);
 					}
-					gameledsY[i] = rand() % 5;
+					gameledsY[i] = rand() % LedsYMax;
 
 				}while((gameledsX[i] == oldX) && (gameledsY[i] == oldY));
 
@@ -218,12 +253,12 @@ void Game(){
 					IncrementScore(0, P1Multiplier);	// add score and inc multiplier (singleplayer)
 					playChirp(P1Multiplier);
 					P1Multiplier = (P1Multiplier == MultiplierMax) ? MultiplierMax : (P1Multiplier + 1);
-				}else{
+					}else{
 					if(i >= 3){
 						IncrementScore(1, P2Multiplier);	// add depending on side of button pressed
 						playChirp(P2Multiplier);
 						P2Multiplier = (P2Multiplier == MultiplierMax) ? MultiplierMax : (P2Multiplier + 1);
-					}else{
+						}else{
 						IncrementScore(0, P1Multiplier);
 						playChirp(P1Multiplier);
 						P1Multiplier = (P1Multiplier == MultiplierMax) ? MultiplierMax : (P1Multiplier + 1);
@@ -231,7 +266,7 @@ void Game(){
 				}
 
 			}
-		}	
+		}
 		
 		
 		if (P1Multiplier > 1){
@@ -250,11 +285,11 @@ void Game(){
 		}
 		
 		
-		//_delay_ms(50);	// TODO maybe change this later	
+		//_delay_ms(50);	// TODO maybe change this later
 
 	}
 	
-						// game is over, stop timer
+	// game is over, stop timer
 	TCCR4B = (0b000 << CS40);
 	
 }
@@ -269,7 +304,7 @@ void Bonus(){
 	_delay_ms(500);
 
 	for(uint8_t i = 0; i < 30; i++){
-		setButtonLed(i % 6, i / 5, 0); // TODO VERIFY THIS WORKS, turn all leds on 
+		setButtonLed(i % 6, i / 5, 0); // TODO VERIFY THIS WORKS, turn all leds on
 	}
 	_delay_ms(500);
 
@@ -283,7 +318,19 @@ void Bonus(){
 	TimeRemaining = BonusTime;
 	TCNT4 = 0;
 	TCCR4B = (0b101 << CS40);	// enable timer 0 (game timer)
+	
+	setScore(0, GameMode == 0 ? HighScore1P : HighScore2P);
+	
 	while(TimeRemaining > 0){
+		
+		setScore(1, TimeRemaining);
+		if(GameMode == 1){
+			setScore(0, P1Score);	// if 2p mode, show left p1 and right p2 scores
+			setScore(2, P2Score);
+			}else{
+			setScore(2, P1Score);	// otherwise show p1 score and high score
+		}
+		
 		for(uint8_t x = 0; x < 6; x++){
 			for(uint8_t y = 0; y < 5; y++){
 				if( isButtonDown(x, y) && (( 1 << (x*5 + y) ) == 0)){		// check later
@@ -292,12 +339,12 @@ void Bonus(){
 					setButtonLed(x,y,0);
 
 					if(GameMode == 0){
-						IncrementScore(0,2);		// TODO later include mil
-					}else{
-						if(x >= 3){
-							IncrementScore(1,2);	
+						IncrementScore(0,BonusPointCount);		// TODO later include mil
 						}else{
-							IncrementScore(0,2);
+						if(x >= 3){
+							IncrementScore(1,BonusPointCount);
+							}else{
+							IncrementScore(0,BonusPointCount);
 						}
 					}
 
@@ -306,34 +353,125 @@ void Bonus(){
 		}
 	}
 	TCCR4B = (0b000 << CS40);
+	
+	setScore(1, 0); // TODO MAKE DASHES
 
+}
+
+void Attractive(){
+	setScore(0, HighScore1P);
+	setScore(1, 0);			// TODO MAKE DASHES AND FLASH "1P" on left and "2P" on right
+	setScore(0, HighScore2P);
+	while(1){
+		uint8_t blinkyMode = rand() % AttractPatternCount;	// todo make random, ADD DISPLAY BLANKING
+		switch(blinkyMode){	// multiple blinky modes (todo randomly pick one)
+			case 0:
+			for(uint8_t mode = 1; mode > 0; mode--){	// turn on then turn	off (add more mod 2 to repeat muliple times)
+				for(uint8_t x = 0; x < 6; x++){			// iterate each LED
+					for (uint8_t y = 0; y < 5; y++){
+						setButtonLed(x, y, mode);	//setbuttonled from buttons.h
+						if( AttractCheckGameStart(100) ){
+							goto EndAttract;
+						}
+
+					}
+				}
+				break;
+			}
+			
+		}
+		EndAttract:
+		return;		// start the game
+	}
+
+}
+
+void ShowWinner(){
+	
+	for(uint8_t i = 0; i < 30; i++){
+		setButtonLed(i % 6, i / 5, 0); // TODO VERIFY THIS WORKS, turn all leds on
+	}								 //blank screen
+	
+	if(GameMode == 0){
+		for(uint8_t count = 0; count < 8; count++){			// flash whole screen 
+			setScore(0, HighScore1P);
+			setScore(2, HighScore1P);
+			
+			for(uint8_t i = 0; i < 30; i++){
+				setButtonLed(i % 6, i / 5, i%2); // TODO VERIFY THIS WORKS, turn all leds on
+			}									// TODO make checkerboard
+			
+			_delay_ms(250);
+			setScore(0, 0);	// TODO TURN SEGMENTS OFF
+			setScore(2, 0);
+			
+			for(uint8_t i = 0; i < 30; i++){
+				setButtonLed(i % 6, i / 5, 1 - (i%2)); // TODO VERIFY THIS WORKS, turn all leds on
+			}
+			
+			_delay_ms(250);
+		}
+	}else{										//2p mode, show winner every time
+		uint8_t winnerhalf = P1Score > P2Score ? 0 : 3; //index half based on winner
+		for(uint8_t i = 0; i < 4; i++){
+			
+			if((P1Score == HighScore2P) || (P2Score == HighScore2P)){
+				setScore(0, HighScore2P);
+				setScore(1, 0);	//TODO EMPTY? show 2P flashing opposite 
+				setScore(2, HighScore2P);
+			}
+			
+			for(uint8_t x = winnerhalf; x < (winnerhalf+3); x++){
+				for(uint8_t y = 0; y < 5; y++){
+					setButtonLed(x,y,1);
+				}
+			}
+			_delay_ms(250);
+			
+			if((P1Score == HighScore2P) || (P2Score == HighScore2P)){
+				setScore(0, 0); // TODO EMPTY
+				setScore(1, 0);	//TODO SHOW 1P if 1p has hs else 2p
+				setScore(2, 0); // todo empty
+			}
+			
+			for(uint8_t x = winnerhalf; x < (winnerhalf+3); x++){
+				for(uint8_t y = 0; y < 5; y++){
+					setButtonLed(x,y,0);
+				}
+			}
+			_delay_ms(250);
+		}
+	}	
 }
 
 void IncrementScore(uint8_t Player, uint16_t value){
 	if(Player == 0){
 		P1Score += value;
 		P1Score = P1Score > 999 ? 999 : P1Score;
-	}else if(Player == 1){
+		}else if(Player == 1){
 		P2Score += value;
 		P2Score = P2Score > 999 ? 999 : P2Score;
 	}
 }
 
-uint8_t onledsX[42] = { 0,1,2,3,3,0,1,2,3,3,0,1,2,3, // matrix of x positions for on leds
-						1,2,3,4,4,1,2,3,4,1,1,2,3,4,
-						4,3,4,4,4,3,4,5,5,5,5,5,5,5};
-uint8_t onledsY[42] = { 0,0,0,0,1,2,2,2,2,3,4,4,4,4,
-						0,0,0,0,1,2,2,2,2,3,4,4,4,4,
-						0,1,1,2,3,4,4,4,4,4,4,4,4,4};
-	
+const uint8_t onledsX[42] = { 0,1,2,3,3,0,1,2,3,3,0,1,2,3, // matrix of x positions for on leds
+	1,2,3,4,4,1,2,3,4,1,1,2,3,4,
+4,3,4,4,4,3,4,5,5,5,5,5,5,5};
+const uint8_t onledsY[42] = { 0,0,0,0,1,2,2,2,2,3,4,4,4,4,
+	0,0,0,0,1,2,2,2,2,3,4,4,4,4,
+0,1,1,2,3,4,4,4,4,4,4,4,4,4};
+
 void Display321(){	//TODO ADD TONES FOR EACH DIGIT
 	
 	for(uint8_t number = 3; number >= 1; number--){
 		// turn off all leds
+		for(uint8_t i = 0; i < 3; i++){
+			setScore(i, number);
+		}
 		for(uint8_t i = 0; i < 30; i++){
 			setButtonLed(i % 6, i / 5, 0); // TODO VERIFY THIS WORKS
 		}
-		for(uint8_t i = 0; i < 14; i++){	// 
+		for(uint8_t i = 0; i < 14; i++){	//
 			setButtonLed(onledsX[i + (14*number)], onledsY[i + (14*number)], 1);
 		}
 		_delay_ms(1000);
@@ -358,37 +496,12 @@ uint8_t AttractCheckGameStart(uint16_t count){
 	return 0;	// return that it finished without button presses
 }
 
-void Attractive(){
-	while(1){
-		uint8_t blinkyMode = 0;	// todo make random, ADD DISPLAY BLANKING
-		switch(blinkyMode){	// multiple blinky modes (todo randomly pick one)
-			case 0:
-			for(uint8_t mode = 1; mode > 0; mode--){	// turn on then turn	off (add more mod 2 to repeat muliple times)
-				for(uint8_t x = 0; x < 6; x++){			// iterate each LED
-					for (uint8_t y = 0; y < 5; y++){
-						setButtonLed(x, y, mode);	//setbuttonled from buttons.h
-						if( AttractCheckGameStart(100) ){
-							goto EndAttract;
-						}
-
-					}
-				}
-				break;
-			}
-			
-		}
-		EndAttract:
-		return;		// start the game
-	}
-
-}
-
 
 void EEPROM_write(uint16_t uiAddress, uint8_t ucData)
 {
 	/* Wait for completion of previous write */
 	while(EECR & (1<<EEPE))
-		;
+	;
 	/* Set up address and Data Registers */
 	EEAR = uiAddress;
 	EEDR = ucData;
@@ -402,7 +515,7 @@ uint8_t EEPROM_read(uint16_t uiAddress)
 {
 	/* Wait for completion of previous write */
 	while(EECR & (1<<EEPE))
-		;
+	;
 	/* Set up address register */
 	EEAR = uiAddress;
 	/* Start eeprom read by writing EERE */
