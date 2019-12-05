@@ -1,50 +1,412 @@
-/*
-* 388SpeedOfLight.c
-*
-* Created: 10/22/2019 1:43:19 PM
-* Author : tchase
-*/
+
+// you just lost the game
+// - josh & the bartenders
+
+#define F_CPU 16000000
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+#include <stdlib.h>			// need RNG
 
 #include "usbQc.h"
 #include "buttons.h"
 
+
+//********************** def hw specific params
+
+#define Player1ButtonX 1	//NOT ACTUAL INDICES, PLS FIX
+#define Player1ButtonY 2
+
+#define Player2ButtonX 1	//NOT ACTUAL INDICES, PLS FIX
+#define Player2ButtonY 2
+
+#define LedsXMax 6
+#define LedsYMax 5
+#define MaxLedsOn 6
+
+#define MultiplierDecaySeconds 1
+#define MultiplierDecayTicks 0	// TODO check that ticks change it
+
+
+#define EEP_ADDR_HighScore_H 0x00
+#define EEP_ADDR_HighScore_L 0x01
+
+#define EEP_ADDR_RoundTime 0x10
+#define EEP_ADDR_BonusTime 0x20
+#define EEP_ADDR_HighScore 0x30
+
+#define EEP_ADDR_RandomSeed_H 0x40
+#define EEP_ADDR_RandomSeed_L 0x41
+
+#define EEP_ADDR_MultMax 0x50
+
+
+//********************** def prototypes
+
+uint8_t GameMode;			// controls next game mode (0 for 1p, 1 for 2p)
+uint8_t RoundTime;
+uint8_t BonusTime;
+volatile uint8_t TimeRemaining;
+uint16_t HighScore;
+
+uint8_t gameledsX[6];
+uint8_t gameledsY[6];
+
+uint16_t P1Score, P2Score;
+uint8_t P1Multiplier, P2Multiplier;
+uint8_t P1MultTimeS, P2MultTimeS;		// for multiplier decay keep track of seconds
+uint16_t P1MultTimeT, P2MultTimeT;		// as well as "sub-seconds" (timer ticks)
+uint8_t MultiplierMax;
+
+
+volatile uint16_t beep_index = 0;
+volatile uint16_t note_index = 0;
+const uint16_t notes[12] = {4545, 4050, 3822, 3405, 3034, 2863, 2551, 2273, 2024, 1911, 1703, 1517};
+
+
+void Game();
+void Display321();
+void Bonus();
+void Attractive();
+uint8_t AttractCheckGameStart(uint16_t count);
+
+void playChirp(uint8_t);
+
+void checkMultiplers();
+void IncrementScore(uint8_t, uint16_t);
+
+void EEPROM_write(uint16_t uiAddress, uint8_t ucData);
+uint8_t EEPROM_read(uint16_t uiAddress);
+
+
 int main(void)
 {
-	// set up the power supply to give 12V 
+
 	usbQcInit();
 	QCset12V();
-
-	// setup for the buttons and LED's 
+	
 	buttonsInit();
 	
-	sei();
 	
-	uint8_t attractAnimation = 1;
+	// initialize timer0 for audio circuit
+	DDRB |= (1 << DDB1) | (1 << DDB5); // output speaker pin B1
+	ICR1 = 0;	// TOP of counter, start OFF
+	OCR1A = 0; //0x1FFF;	// OFF at
+	TCCR1A |= (1 << COM1A1) | (1 << WGM11); //|(0 << COM1B1);
+	TCCR1B |= (1 << WGM12 ) | (1 << WGM13) | (1 << CS41);
+	PORTB &= ~(1 << 1);
+	
+	TCCR0A = (1 << WGM01);	// enable CTC mode timer 0
+	TCCR0B = 0;		//disable clock for timer0, as it will be enabled when "beeped"
+	OCR0A = 125;
+	TIMSK0 = ( 1 << OCIE0A );
+
+
+
+	//load values from eeprom
+	HighScore = (EEPROM_read(EEP_ADDR_HighScore_H) << 8) | (EEPROM_read(EEP_ADDR_HighScore_L));
+	RoundTime = EEPROM_read(EEP_ADDR_RoundTime);
+	BonusTime = EEPROM_read(EEP_ADDR_BonusTime);
+	MultiplierMax = EEPROM_read(EEP_ADDR_MultMax);
+	
+	// load random value from eeprom as seed and write new random value
+	srand((EEPROM_read(EEP_ADDR_RandomSeed_H) << 8) | EEPROM_read(EEP_ADDR_RandomSeed_L));
+	EEPROM_write(EEP_ADDR_RandomSeed_H, rand()%256 );
+	EEPROM_write(EEP_ADDR_RandomSeed_L, rand()%256 );
+	
+	
+							// set up timer4 for game timer
+	TCCR4A = (1 << WGM41);	// CTC mode
+	TCCR4B = 0;				// disable timer until game start (set to 64 prescale later in code)
+	TIMSK4 = (1 << OCIE4A);
+	OCR4A = 15625;			// set up for 1s
+
+	sei();
+
 	while (1)
 	{
-		switch(attractAnimation){
-			case 0:
-			break;
-			case 1:
-			// swipe horizontally
-			for(uint8_t x = 0; x < 6; x++){
-				for(uint8_t y = 0; y < 5; y++){
-					//setButtonLed(x, y, 1);
-				}
-				_delay_ms(100);
-			}
-			
-			for(uint8_t x = 0; x < 6; x++){
-				for(uint8_t y = 0; y < 5; y++){
-					//setButtonLed(x, y, 0);
-				}
-				_delay_ms(100);
-			}
-			break;
-		}
+		Attractive();		// loop thru patterns until game start is pressed (TODO IMPLEMENT DEBUG PATTERN)
+		Game();
+		Bonus();
+
 	}
 }
+
+ISR(TIMER0_COMPA_vect)		// audio interrupt
+{
+	switch(note_index)
+	{	//every 8ms
+		case 0+1:	//0ms, 8ms on
+		ICR1 = notes[beep_index];	//1st note
+		OCR1A = notes[beep_index]/2;
+		break;
+		case 2+1:	// 16ms, 24, 32 on
+		ICR1 = notes[beep_index+1];	//2nd note
+		OCR1A = notes[beep_index]/2;
+		break;
+		case 5+1:	// 40ms, 48, 56, 64, 72, 80, 88, 96, on
+		ICR1 = notes[beep_index+2];	// 3rd note
+		OCR1A = notes[beep_index]/2;
+		break;
+		case 13+1:
+		//ICR1 = 0;					//off
+		OCR1A = 0;
+		break;
+		
+		case 63+1:
+		beep_index = 0;
+		note_index = -1;
+		TCCR0B &= ~(0b101 << CS00);
+		TCNT0 = 0;
+		break;
+	}
+	note_index += 1;
+}
+
+ISR(TIMER4_COMPA_vect){		// use timer 4 for decreasing game time every 1s
+	if(TimeRemaining > 0){
+		TimeRemaining--;
+	}
+}
+
+void Game(){
+
+							// game mode is set when leaving attract mode
+	Display321();
+	
+	P1Score = 0;			// reset scores and multipliers
+	P2Score = 0;
+	P1Multiplier = 1;
+	P2Multiplier = 1;
+
+							// pick 6 random leds to enable regardless of mode
+							// (3 left side 3 right side)
+	for(int i = 0; i < (MaxLedsOn / 2); i++){
+		gameledsX[i] = rand() % (LedsXMax / 2);			// turn 3 on left side
+		gameledsY[i] = rand() % 5;
+		
+		gameledsX[i+3] = 3 + rand() % (LedsXMax / 2);	// turn 3 on right side
+		gameledsY[i+3] = rand() % 5;
+	}
+
+
+	TimeRemaining = RoundTime;
+	TCNT4 = 0;					// reset timer
+	TCCR4B = (0b101 << CS40);	// enable timer 0 (game timer)
+	
+	while(TimeRemaining > 0){		
+
+		for(uint8_t i = 0; i < 6; i++){
+			if (isButtonDown(gameledsX[i], gameledsY[i]) ){
+
+				uint8_t oldX = gameledsX[i];
+				uint8_t oldY = gameledsY[i];
+
+				do{		// move led to random DIFFERENT spot
+					if(i >= 3){	
+						gameledsX[i+3] = 3 + rand() % (LedsXMax / 2);
+					}else{
+						gameledsX[i] = rand() % (LedsXMax / 2);
+					}
+					gameledsY[i] = rand() % 5;
+
+				}while((gameledsX[i] == oldX) && (gameledsY[i] == oldY));
+
+
+				if(GameMode == 0){
+					IncrementScore(0, P1Multiplier);	// add score and inc multiplier (singleplayer)
+					playChirp(P1Multiplier);
+					P1Multiplier = (P1Multiplier == MultiplierMax) ? MultiplierMax : (P1Multiplier + 1);
+				}else{
+					if(i >= 3){
+						IncrementScore(1, P2Multiplier);	// add depending on side of button pressed
+						playChirp(P2Multiplier);
+						P2Multiplier = (P2Multiplier == MultiplierMax) ? MultiplierMax : (P2Multiplier + 1);
+					}else{
+						IncrementScore(0, P1Multiplier);
+						playChirp(P1Multiplier);
+						P1Multiplier = (P1Multiplier == MultiplierMax) ? MultiplierMax : (P1Multiplier + 1);
+					}
+				}
+
+			}
+		}	
+		
+		
+		if (P1Multiplier > 1){
+			if ( (P1MultTimeS + MultiplierDecaySeconds) <= TimeRemaining){
+				if(P1MultTimeT < MultiplierDecayTicks){	// TODO INCORPORATE TICK OFFSET
+					P1Multiplier--;
+				}
+			}
+		}
+		if (P2Multiplier > 1){
+			if ( (P2MultTimeS + MultiplierDecaySeconds) <= TimeRemaining){
+				if(P2MultTimeT < MultiplierDecayTicks){	// TODO INCORPORATE TICK OFFSET
+					P2Multiplier--;
+				}
+			}
+		}
+		
+		
+		//_delay_ms(50);	// TODO maybe change this later	
+
+	}
+	
+						// game is over, stop timer
+	TCCR4B = (0b000 << CS40);
+	
+}
+
+void Bonus(){
+
+	// blink leds to indicate bonus round start
+
+	for(uint8_t i = 0; i < 30; i++){
+		setButtonLed(i % 6, i / 5, 1); // TODO VERIFY THIS WORKS, turn all leds on
+	}
+	_delay_ms(500);
+
+	for(uint8_t i = 0; i < 30; i++){
+		setButtonLed(i % 6, i / 5, 0); // TODO VERIFY THIS WORKS, turn all leds on 
+	}
+	_delay_ms(500);
+
+	for(uint8_t i = 0; i < 30; i++){
+		setButtonLed(i % 6, i / 5, 1); // TODO VERIFY THIS WORKS, turn all leds on
+	}
+	_delay_ms(250);
+
+	uint32_t HasPressed = 0;	// store 30 stored buttons
+	
+	TimeRemaining = BonusTime;
+	TCNT4 = 0;
+	TCCR4B = (0b101 << CS40);	// enable timer 0 (game timer)
+	while(TimeRemaining > 0){
+		for(uint8_t x = 0; x < 6; x++){
+			for(uint8_t y = 0; y < 5; y++){
+				if( isButtonDown(x, y) && (( 1 << (x*5 + y) ) == 0)){		// check later
+
+					HasPressed |= (1 << (x*5 + y) );
+					setButtonLed(x,y,0);
+
+					if(GameMode == 0){
+						IncrementScore(0,2);		// TODO later include mil
+					}else{
+						if(x >= 3){
+							IncrementScore(1,2);	
+						}else{
+							IncrementScore(0,2);
+						}
+					}
+
+				}
+			}
+		}
+	}
+	TCCR4B = (0b000 << CS40);
+
+}
+
+void IncrementScore(uint8_t Player, uint16_t value){
+	if(Player == 0){
+		P1Score += value;
+		P1Score = P1Score > 999 ? 999 : P1Score;
+	}else if(Player == 1){
+		P2Score += value;
+		P2Score = P2Score > 999 ? 999 : P2Score;
+	}
+}
+
+uint8_t onledsX[42] = { 0,1,2,3,3,0,1,2,3,3,0,1,2,3, // matrix of x positions for on leds
+						1,2,3,4,4,1,2,3,4,1,1,2,3,4,
+						4,3,4,4,4,3,4,5,5,5,5,5,5,5};
+uint8_t onledsY[42] = { 0,0,0,0,1,2,2,2,2,3,4,4,4,4,
+						0,0,0,0,1,2,2,2,2,3,4,4,4,4,
+						0,1,1,2,3,4,4,4,4,4,4,4,4,4};
+	
+void Display321(){	//TODO ADD TONES FOR EACH DIGIT
+	
+	for(uint8_t number = 3; number >= 1; number--){
+		// turn off all leds
+		for(uint8_t i = 0; i < 30; i++){
+			setButtonLed(i % 6, i / 5, 0); // TODO VERIFY THIS WORKS
+		}
+		for(uint8_t i = 0; i < 14; i++){	// 
+			setButtonLed(onledsX[i + (14*number)], onledsY[i + (14*number)], 1);
+		}
+		_delay_ms(1000);
+	}
+}
+
+void playChirp(uint8_t tone){
+	beep_index = tone;
+	note_index = 0;
+	TCCR0B = (0b101 << CS00);	//turn on clock for
+}
+
+uint8_t AttractCheckGameStart(uint16_t count){
+	// pauses some time while checking player button inputs, skip and start game if pressed
+	for(uint16_t delayCount = 0; delayCount < count; delayCount++){
+		//delay some ms between each button light and check for game start
+		if(isButtonDown(Player1ButtonX, Player1ButtonY) || isButtonDown(Player2ButtonX, Player2ButtonY)){
+			GameMode = isButtonDown(Player2ButtonX, Player2ButtonY);
+			return 1;	// instantly return and quit waiting
+		}
+	}
+	return 0;	// return that it finished without button presses
+}
+
+void Attractive(){
+	while(1){
+		uint8_t blinkyMode = 0;	// todo make random, ADD DISPLAY BLANKING
+		switch(blinkyMode){	// multiple blinky modes (todo randomly pick one)
+			case 0:
+			for(uint8_t mode = 1; mode > 0; mode--){	// turn on then turn	off (add more mod 2 to repeat muliple times)
+				for(uint8_t x = 0; x < 6; x++){			// iterate each LED
+					for (uint8_t y = 0; y < 5; y++){
+						setButtonLed(x, y, mode);	//setbuttonled from buttons.h
+						if( AttractCheckGameStart(100) ){
+							goto EndAttract;
+						}
+
+					}
+				}
+				break;
+			}
+			
+		}
+		EndAttract:
+		return;		// start the game
+	}
+
+}
+
+
+void EEPROM_write(uint16_t uiAddress, uint8_t ucData)
+{
+	/* Wait for completion of previous write */
+	while(EECR & (1<<EEPE))
+		;
+	/* Set up address and Data Registers */
+	EEAR = uiAddress;
+	EEDR = ucData;
+	/* Write logical one to EEMPE */
+	EECR |= (1<<EEMPE);
+	/* Start eeprom write by setting EEPE */
+	EECR |= (1<<EEPE);
+}
+
+uint8_t EEPROM_read(uint16_t uiAddress)
+{
+	/* Wait for completion of previous write */
+	while(EECR & (1<<EEPE))
+		;
+	/* Set up address register */
+	EEAR = uiAddress;
+	/* Start eeprom read by writing EERE */
+	EECR |= (1<<EERE);
+	/* Return data from Data Register */
+	return EEDR;
+}
