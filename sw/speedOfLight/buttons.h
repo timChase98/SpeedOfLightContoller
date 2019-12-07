@@ -10,7 +10,7 @@
 #define BUTTONS_H_
 
 #define  LED_L 0 // led latch on B.0
-#define  LED_B 1 // led blank on B.1
+#define  LED_B 3 // led blank on E.3
 
 
 void buttonsInit();

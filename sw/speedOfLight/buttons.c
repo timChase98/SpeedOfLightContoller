@@ -32,7 +32,14 @@ void buttonsInit(){
 	PORTD = 0xFF; // set pullup resistors
 	
 	// set DDR for latch and blank pins
-	DDRB |= 1 << LED_L | 1 << LED_B;
+	DDRB |= 1 << LED_L;
+	DDRE|= 1 << LED_B;
+	DDRE |= 1 << 2; // enable LEDs 
+	PORTE |= 1 << LED_B;
+	
+	// test
+	DDRC |= 1 << 0;
+	PORTC |= 1 << 0;
 	
 	spiSetup();
 	tmrSetup();
@@ -85,6 +92,9 @@ ISR(TIMER3_COMPA_vect){
 	// the row is in the lower nibble and column data is in the upper nibble
 	// for each row the two registers need to be set and the other two need to be cleared
 	
+	
+	PINC |= 1 << 0;
+	
 	if(muxCounter < 3){
 		ledData[0] = (1 << muxCounter) | ((ledMemory[9 + muxCounter] >> 4) << 4);
 		ledData[1] = (1 << muxCounter) | ((ledMemory[9 + muxCounter] & 0x0F) << 4);
@@ -115,10 +125,10 @@ ISR(TIMER3_COMPA_vect){
 	
 
 	// clear contents of shift register and latch
-	PORTB &= ~(1 << LED_L); // set led latch low
-	PORTB &= ~(1 << LED_B); // blank leds
-	PORTB |= (1 << LED_L); // set led latch high
-	PORTB |= (1 << LED_B); // unblank leds
+	//PORTB &= ~(1 << LED_L); // set led latch low
+	//PORTE &= ~(1 << LED_B); // blank leds
+	//PORTB |= (1 << LED_L); // set led latch high
+	PORTE |= (1 << LED_B); // unblank leds
 	PORTB &= ~(1 << LED_L); // set led latch low
 	spiByteCounter = 0;
 	SPDR0 = ledData[spiByteCounter++];

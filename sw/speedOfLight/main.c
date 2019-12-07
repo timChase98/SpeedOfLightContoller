@@ -2,7 +2,6 @@
 // you just lost the game
 // - josh & the bartenders
 
-#define F_CPU 16000000
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -89,11 +88,16 @@ uint8_t EEPROM_read(uint16_t uiAddress);
 int main(void)
 {
 
-	usbQcInit();
-	QCset12V();
+	//usbQcInit();
+	//QCset12V();
 	
 	buttonsInit();
 	
+	sei();
+	
+	while(1){
+		
+	}
 	
 	// initialize timer0 for audio circuit
 	DDRB |= (1 << DDB1) | (1 << DDB5); // output speaker pin B1
