@@ -7,6 +7,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdlib.h>			// need RNG
+#include <stdio.h>
 
 #include "usbQc.h"
 #include "buttons.h"
@@ -84,6 +85,23 @@ void IncrementScore(uint8_t, uint16_t);
 void EEPROM_write(uint16_t uiAddress, uint8_t ucData);
 uint8_t EEPROM_read(uint16_t uiAddress);
 
+static int uart_putchar(char c, FILE *stream);
+static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL,
+_FDEV_SETUP_WRITE);
+static int uart_putchar(char c, FILE *stream)
+{
+	if (c == '\n')
+	uart_putchar('\r', stream);
+	while(!(UCSR0A &( 1 << UDRE0)));
+	UDR0 = c;
+	return 0;
+}
+
+void init_uart(){
+	UCSR0B = (1<<RXEN0)|(1<<TXEN0);
+	UCSR0C = (3<<UCSZ00);
+	UBRR0L = 51;
+}
 
 int main(void)
 {
@@ -92,10 +110,23 @@ int main(void)
 	//QCset12V();
 	
 	buttonsInit();
+	init_uart();
+	stdout = &mystdout;
+	printf("Hello World\n");
 	
 	sei();
 	
 	while(1){
+		for(int x = 0; x < 6; x++){
+			for (int y = 0; y < 6; y++)
+			{
+				if (isButtonDown(x, y))
+				{
+					printf("%d, %d\n", x, y);
+				}
+			}
+		}
+		
 		
 	}
 	
@@ -148,7 +179,7 @@ int main(void)
 				HighScore1P = P1Score;
 				ShowWinner();			//if new high score, flash screen
 			}
-		}else{
+			}else{
 			if((P1Score > HighScore2P) || (P2Score > HighScore2P)){
 				HighScore2P = (P1Score > P2Score ? P1Score : P2Score);
 			}
@@ -397,7 +428,7 @@ void ShowWinner(){
 	}								 //blank screen
 	
 	if(GameMode == 0){
-		for(uint8_t count = 0; count < 8; count++){			// flash whole screen 
+		for(uint8_t count = 0; count < 8; count++){			// flash whole screen
 			setScore(0, HighScore1P);
 			setScore(2, HighScore1P);
 			
@@ -415,13 +446,13 @@ void ShowWinner(){
 			
 			_delay_ms(250);
 		}
-	}else{										//2p mode, show winner every time
+		}else{										//2p mode, show winner every time
 		uint8_t winnerhalf = P1Score > P2Score ? 0 : 3; //index half based on winner
 		for(uint8_t i = 0; i < 4; i++){
 			
 			if((P1Score == HighScore2P) || (P2Score == HighScore2P)){
 				setScore(0, HighScore2P);
-				setScore(1, 0);	//TODO EMPTY? show 2P flashing opposite 
+				setScore(1, 0);	//TODO EMPTY? show 2P flashing opposite
 				setScore(2, HighScore2P);
 			}
 			
@@ -445,7 +476,7 @@ void ShowWinner(){
 			}
 			_delay_ms(250);
 		}
-	}	
+	}
 }
 
 void IncrementScore(uint8_t Player, uint16_t value){

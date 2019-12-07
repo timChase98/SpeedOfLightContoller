@@ -10,7 +10,7 @@
 #include "buttons.h"
 
 // 9 bytes of score display digits + 6 bytes of LED ROWs
-volatile uint8_t ledMemory[9 + 6] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E, 0x6F}; // memory for led states
+volatile uint8_t ledMemory[9 + 6] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // memory for led states
 
 // 2 bytes for score display and 1 byte for each corner matrix
 volatile uint8_t ledData[2 + 4] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF}; // data buffer to shift out to the led registers
@@ -37,9 +37,9 @@ void buttonsInit(){
 	DDRE |= 1 << 2; // enable LEDs 
 	PORTE |= 1 << LED_B;
 	
-	// test
-	DDRC |= 1 << 0;
-	PORTC |= 1 << 0;
+	// input PULLUPs 
+	DDRD  &= 0b00000011;
+	PORTD |= 0b11111100;
 	
 	spiSetup();
 	tmrSetup();
@@ -93,19 +93,17 @@ ISR(TIMER3_COMPA_vect){
 	// for each row the two registers need to be set and the other two need to be cleared
 	
 	
-	PINC |= 1 << 0;
-	
 	if(muxCounter < 3){
-		ledData[0] = (1 << muxCounter) | ((ledMemory[9 + muxCounter] >> 4) << 4);
+		ledData[0] = (1 << muxCounter) | ((ledMemory[9 + muxCounter] & 0x0F) << 4);
 		ledData[1] = (1 << muxCounter) | ((ledMemory[9 + muxCounter] & 0x0F) << 4);
-		ledData[2] = 0;
-		ledData[3] = 0;
+		ledData[2] = (1 << muxCounter) | ((ledMemory[9 + muxCounter] & 0x0F) << 4);
+		ledData[3] = (1 << muxCounter) | ((ledMemory[9 + muxCounter] & 0x0F) << 4);
 	}
 	else{
-		ledData[2] = (1 << (muxCounter - 3)) | ((ledMemory[9 + muxCounter] >> 4) << 4);
-		ledData[3] = (1 << (muxCounter - 3)) | ((ledMemory[9 + muxCounter] & 0x0F) << 4);
 		ledData[0] = 0;
-		ledData[1] = 0;
+		ledData[1] = 0;//(1 << (muxCounter-3)) | ((ledMemory[9 + muxCounter] & 0x0F) << 4);
+		ledData[2] = (1 << (muxCounter-3)) | ((ledMemory[9 + muxCounter] & 0x0F) << 4);
+		ledData[3] = 0;
 	}
 	
 	muxCounter = (muxCounter + 1) % 6;
@@ -125,9 +123,9 @@ ISR(TIMER3_COMPA_vect){
 	
 
 	// clear contents of shift register and latch
-	//PORTB &= ~(1 << LED_L); // set led latch low
-	//PORTE &= ~(1 << LED_B); // blank leds
-	//PORTB |= (1 << LED_L); // set led latch high
+	PORTB &= ~(1 << LED_L); // set led latch low
+	PORTE &= ~(1 << LED_B); // blank leds
+	PORTB |= (1 << LED_L); // set led latch high
 	PORTE |= (1 << LED_B); // unblank leds
 	PORTB &= ~(1 << LED_L); // set led latch low
 	spiByteCounter = 0;
@@ -137,7 +135,7 @@ ISR(TIMER3_COMPA_vect){
 ISR(TIMER3_COMPB_vect){
 	// Read in Buttons
 	PORTC = ~(1 << muxCounter);// set 1 bit to a 0
-	buttonMemory[muxCounter] = ~PIND;
+	buttonMemory[muxCounter] = ~PIND >> 2;
 	
 }
 
