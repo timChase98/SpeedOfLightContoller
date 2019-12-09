@@ -15,15 +15,12 @@
 
 //********************** def hw specific params
 
-#define Player1ButtonX 1	//NOT ACTUAL INDICES, PLS FIX
-#define Player1ButtonY 2
+#define Player1ButtonX 3
+#define Player1ButtonY 0
 
-#define Player2ButtonX 1	//NOT ACTUAL INDICES, PLS FIX
-#define Player2ButtonY 2
+#define Player2ButtonX 2	
+#define Player2ButtonY 0
 
-#define LedsXMax 6
-#define LedsYMax 5
-#define MaxLedsOn 6
 
 #define MultiplierDecaySeconds 1
 #define MultiplierDecayTicks 0	// TODO check that ticks change it
@@ -86,8 +83,8 @@ void EEPROM_write(uint16_t uiAddress, uint8_t ucData);
 uint8_t EEPROM_read(uint16_t uiAddress);
 
 static int uart_putchar(char c, FILE *stream);
-static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL,
-_FDEV_SETUP_WRITE);
+static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
+
 static int uart_putchar(char c, FILE *stream)
 {
 	if (c == '\n')
@@ -112,17 +109,24 @@ int main(void)
 	buttonsInit();
 	init_uart();
 	stdout = &mystdout;
-	printf("Hello World\n");
+	
+	printf("Welcome to bartending robot OS ver 4.7B\n");
 	
 	sei();
 	
-	while(1){
+	while(1){							//REMOVE THIS, FOR TESTING
 		for(int x = 0; x < 6; x++){
 			for (int y = 0; y < 6; y++)
 			{
 				if (isButtonDown(x, y))
 				{
-					printf("%d, %d\n", x, y);
+					printf("%d, %d\n\n", x, y);
+					setButtonLed(x, y, 1);
+					/*(while(isButtonDown(x,y)){	//wait for button unpress
+						;
+					}*/
+				}else{
+					setButtonLed(x, y, 0);
 				}
 			}
 		}
@@ -142,8 +146,8 @@ int main(void)
 	TCCR0B = 0;		//disable clock for timer0, as it will be enabled when "beeped"
 	OCR0A = 125;
 	TIMSK0 = ( 1 << OCIE0A );
-
-
+	
+	printf("AUDIO TIMERS & PORT SET");
 
 	//load values from eeprom
 	HighScore1P = (EEPROM_read(EEP_ADDR_HighScore1P_H) << 8) | (EEPROM_read(EEP_ADDR_HighScore1P_L));
@@ -158,6 +162,7 @@ int main(void)
 	EEPROM_write(EEP_ADDR_RandomSeed_H, rand()%256 );
 	EEPROM_write(EEP_ADDR_RandomSeed_L, rand()%256 );
 	
+	printf("EEPROM VALUES SET");
 	
 	// set up timer4 for game timer
 	TCCR4A = (1 << WGM41);	// CTC mode
@@ -169,6 +174,7 @@ int main(void)
 
 	while (1)
 	{
+		printf("STARTING ATTRACT MODE");
 		Attractive();		// loop thru patterns until game start is pressed (TODO IMPLEMENT DEBUG PATTERN)
 		Game();
 		_delay_ms(750);
@@ -241,11 +247,11 @@ void Game(){
 
 	// pick 6 random leds to enable regardless of mode
 	// (3 left side 3 right side)
-	for(int i = 0; i < (MaxLedsOn / 2); i++){
-		gameledsX[i] = rand() % (LedsXMax / 2);			// turn 3 on left side
+	for(int i = 0; i < 3; i++){
+		gameledsX[i] = rand() % 3;			// turn 3 on right side
 		gameledsY[i] = rand() % 5;
 		
-		gameledsX[i+3] = 3 + rand() % (LedsXMax / 2);	// turn 3 on right side
+		gameledsX[i+3] = 3 + rand() % 3;	// turn 3 on left side
 		gameledsY[i+3] = rand() % 5;
 	}
 
@@ -275,11 +281,11 @@ void Game(){
 
 				do{		// move led to random DIFFERENT spot
 					if(i >= 3){
-						gameledsX[i+3] = 3 + rand() % (LedsXMax / 2);
+						gameledsX[i+3] = 3 + rand() % 3;
 						}else{
-						gameledsX[i] = rand() % (LedsXMax / 2);
+						gameledsX[i] = rand() % 3;
 					}
-					gameledsY[i] = rand() % LedsYMax;
+					gameledsY[i] = rand() % 5;
 
 				}while((gameledsX[i] == oldX) && (gameledsY[i] == oldY));
 
@@ -489,12 +495,15 @@ void IncrementScore(uint8_t Player, uint16_t value){
 	}
 }
 
-const uint8_t onledsX[42] = { 0,1,2,3,3,0,1,2,3,3,0,1,2,3, // matrix of x positions for on leds
-	1,2,3,4,4,1,2,3,4,1,1,2,3,4,
-4,3,4,4,4,3,4,5,5,5,5,5,5,5};
+/*const uint8_t onledsX[42] = { 0,1,2,3,3,0,1,2,3,3,0,1,2,3, // matrix of x positions for on leds
+							  1,2,3,4,4,1,2,3,4,1,1,2,3,4,	 // uses top left as 0,0, so inverted
+							  4,3,4,4,4,3,4,5,5,5,5,5,5,5};*/
+const uint8_t onledsX[42] = { 5,4,3,2,2,5,4,3,2,2,5,4,3,2,
+							  4,3,2,1,1,4,3,2,1,4,4,3,2,1,
+							  1,2,1,1,1,2,1,0,0,0,0,0,0,0};
 const uint8_t onledsY[42] = { 0,0,0,0,1,2,2,2,2,3,4,4,4,4,
-	0,0,0,0,1,2,2,2,2,3,4,4,4,4,
-0,1,1,2,3,4,4,4,4,4,4,4,4,4};
+							  0,0,0,0,1,2,2,2,2,3,4,4,4,4,
+							  0,1,1,2,3,4,4,4,4,4,4,4,4,4};
 
 void Display321(){	//TODO ADD TONES FOR EACH DIGIT
 	
@@ -508,6 +517,7 @@ void Display321(){	//TODO ADD TONES FOR EACH DIGIT
 		}
 		for(uint8_t i = 0; i < 14; i++){	//
 			setButtonLed(onledsX[i + (14*number)], onledsY[i + (14*number)], 1);
+			//TODO FIX THIS
 		}
 		_delay_ms(1000);
 	}
@@ -516,7 +526,7 @@ void Display321(){	//TODO ADD TONES FOR EACH DIGIT
 void playChirp(uint8_t tone){
 	beep_index = tone;
 	note_index = 0;
-	TCCR0B = (0b101 << CS00);	//turn on clock for
+	TCCR0B = (0b101 << CS00);	//turn on clock for speaker
 }
 
 uint8_t AttractCheckGameStart(uint16_t count){

@@ -8,6 +8,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "buttons.h"
+#include <stdio.h>
 
 // 9 bytes of score display digits + 6 bytes of LED ROWs
 volatile uint8_t ledMemory[9 + 6] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // memory for led states
@@ -34,10 +35,10 @@ void buttonsInit(){
 	// set DDR for latch and blank pins
 	DDRB |= 1 << LED_L;
 	DDRE|= 1 << LED_B;
-	DDRE |= 1 << 2; // enable LEDs 
+	DDRE |= 1 << 2; // enable LEDs
 	PORTE |= 1 << LED_B;
 	
-	// input PULLUPs 
+	// input PULLUPs
 	DDRD  &= 0b00000011;
 	PORTD |= 0b11111100;
 	
@@ -72,10 +73,10 @@ uint8_t isButtonDown(uint8_t x, uint8_t y){
 
 void setButtonLed(uint8_t x, uint8_t y, uint8_t value){
 	if(value){
-		ledMemory[9 + y] |= 1 << x;
+		ledMemory[9 + x] |= 1 << y;
 		return;
 	}
-	ledMemory[9 + y] &= ~(1 << x);
+	ledMemory[9 + x] &= ~(1 << y);
 	
 }
 
@@ -87,23 +88,25 @@ void setScore(uint8_t display, uint16_t value){
 ISR(TIMER3_COMPA_vect){
 	// calculate data for led rows
 	// rows span across two adjacent shift registers
-	// row 0, 1, 2 are on LED 2 and 3
-	// row 3, 4, 5 are on LED 4 and 5
+	// col 0, 1, 2 are on LED 3 and 0
+	// col 3, 4, 5 are on LED 2 and 1
 	// the row is in the lower nibble and column data is in the upper nibble
 	// for each row the two registers need to be set and the other two need to be cleared
 	
+	// ledData for the matrixes are stored as a byte array of the column data
 	
-	if(muxCounter < 3){
-		ledData[0] = (1 << muxCounter) | ((ledMemory[9 + muxCounter] & 0x0F) << 4);
-		ledData[1] = (1 << muxCounter) | ((ledMemory[9 + muxCounter] & 0x0F) << 4);
-		ledData[2] = (1 << muxCounter) | ((ledMemory[9 + muxCounter] & 0x0F) << 4);
-		ledData[3] = (1 << muxCounter) | ((ledMemory[9 + muxCounter] & 0x0F) << 4);
+	if (muxCounter < 3)
+	{
+		ledData[3] = ((1 << muxCounter)) | ((ledMemory[9 + muxCounter] & 0b00000111)<<4); 
+		ledData[2] = 0;
+		ledData[1] = 0;
+		ledData[0] = ((1 << muxCounter)) | ((ledMemory[9 + muxCounter] & 0b00111000)<<1); 
 	}
 	else{
-		ledData[0] = 0;
-		ledData[1] = 0;//(1 << (muxCounter-3)) | ((ledMemory[9 + muxCounter] & 0x0F) << 4);
-		ledData[2] = (1 << (muxCounter-3)) | ((ledMemory[9 + muxCounter] & 0x0F) << 4);
 		ledData[3] = 0;
+		ledData[2] = ((1 << (muxCounter-3))) | ((ledMemory[9 + muxCounter] & 0b00000111)<<4);
+		ledData[1] = ((1 << (muxCounter-3))) | ((ledMemory[9 + muxCounter] & 0b00111000)<<1);
+		ledData[0] = 0;
 	}
 	
 	muxCounter = (muxCounter + 1) % 6;
