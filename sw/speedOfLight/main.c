@@ -5,7 +5,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#define F_CPU 8000000UL
+#define F_CPU 16000000UL
 #include <util/delay.h>
 #include <stdlib.h>			// need RNG
 #include <stdio.h>

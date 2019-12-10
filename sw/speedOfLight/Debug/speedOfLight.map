@@ -874,15 +874,15 @@ END GROUP
  .debug_frame   0x00000138      0x258 main.o
  .debug_frame   0x00000390       0xb4 usbQc.o
 
-.debug_str      0x00000000      0x851
+.debug_str      0x00000000      0x83e
  *(.debug_str)
  .debug_str     0x00000000      0x318 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega328pb/avr5/crtatmega328pb.o
- .debug_str     0x00000318      0x21a buttons.o
-                                0x253 (size before relaxing)
- .debug_str     0x00000532      0x2d1 main.o
-                                0x47e (size before relaxing)
- .debug_str     0x00000803       0x4e usbQc.o
-                                0x208 (size before relaxing)
+ .debug_str     0x00000318      0x207 buttons.o
+                                0x240 (size before relaxing)
+ .debug_str     0x0000051f      0x2d1 main.o
+                                0x46b (size before relaxing)
+ .debug_str     0x000007f0       0x4e usbQc.o
+                                0x1f5 (size before relaxing)
 
 .debug_loc      0x00000000      0xf48
  *(.debug_loc)

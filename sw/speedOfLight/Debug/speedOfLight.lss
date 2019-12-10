@@ -23,11 +23,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
   9 .debug_frame  00000444  00000000  00000000  00004d0c  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000851  00000000  00000000  00005150  2**0
+ 10 .debug_str    0000083e  00000000  00000000  00005150  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00000f48  00000000  00000000  000059a1  2**0
+ 11 .debug_loc    00000f48  00000000  00000000  0000598e  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000228  00000000  00000000  000068e9  2**0
+ 12 .debug_ranges 00000228  00000000  00000000  000068d6  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -976,8 +976,8 @@ void _handshake(){
 
 	__builtin_avr_delay_cycles(__ticks_dc);
  64c:	2f ef       	ldi	r18, 0xFF	; 255
- 64e:	8e e9       	ldi	r24, 0x9E	; 158
- 650:	94 e2       	ldi	r25, 0x24	; 36
+ 64e:	8d e3       	ldi	r24, 0x3D	; 61
+ 650:	99 e4       	ldi	r25, 0x49	; 73
  652:	21 50       	subi	r18, 0x01	; 1
  654:	80 40       	sbci	r24, 0x00	; 0
  656:	90 40       	sbci	r25, 0x00	; 0
@@ -987,8 +987,8 @@ void _handshake(){
 	_delay_ms(1500);
 	_dm0V();
  65e:	0e 94 18 03 	call	0x630	; 0x630 <_dm0V>
- 662:	8f e9       	ldi	r24, 0x9F	; 159
- 664:	9f e0       	ldi	r25, 0x0F	; 15
+ 662:	8f e3       	ldi	r24, 0x3F	; 63
+ 664:	9f e1       	ldi	r25, 0x1F	; 31
  666:	01 97       	sbiw	r24, 0x01	; 1
  668:	f1 f7       	brne	.-4      	; 0x666 <_handshake+0x1e>
  66a:	00 c0       	rjmp	.+0      	; 0x66c <_handshake+0x24>
@@ -997,7 +997,7 @@ void _handshake(){
 
 00000670 <usbQcInit>:
 #include "usbQc.h"
-#define F_CPU 8000000UL
+#define F_CPU 16000000UL
 #include <util/delay.h>
 
 void usbQcInit(){
