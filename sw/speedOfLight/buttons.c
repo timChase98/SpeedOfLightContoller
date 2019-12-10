@@ -14,7 +14,7 @@
 volatile uint8_t ledMemory[9 + 6] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // memory for led states
 
 // 2 bytes for score display and 1 byte for each corner matrix
-volatile uint8_t ledData[2 + 4] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF}; // data buffer to shift out to the led registers
+volatile uint8_t ledData[2 + 4] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; // data buffer to shift out to the led registers
 
 // 1 byte per row,
 volatile uint8_t buttonMemory[6];
@@ -29,18 +29,14 @@ const uint8_t sevenSegmentDecode[17] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D
 
 void buttonsInit(){
 	// set DDR for button matrix
-	DDRC = 0x3F; // set to outputs
-	PORTD = 0xFF; // set pullup resistors
+	DDRD = 0xFF;
+	PORTC = 0xFF;
 	
 	// set DDR for latch and blank pins
 	DDRB |= 1 << LED_L;
 	DDRE|= 1 << LED_B;
 	DDRE |= 1 << 2; // enable LEDs
 	PORTE |= 1 << LED_B;
-	
-	// input PULLUPs
-	DDRD  &= 0b00000011;
-	PORTD |= 0b11111100;
 	
 	spiSetup();
 	tmrSetup();
@@ -61,7 +57,8 @@ void tmrSetup(){
 	
 	// CTC mode clk/1
 	TCCR3B = (1 << WGM12) | (1 << CS11);
-	OCR3A = 3700;
+	//OCR3A = 3700;
+	OCR3A = 3000;
 	OCR3B = 1850;
 	TIMSK3 |= (1 << OCIE3B) | 1 << (OCIE3A);
 	TCNT3 = 0;
@@ -93,14 +90,14 @@ ISR(TIMER3_COMPA_vect){
 	// the row is in the lower nibble and column data is in the upper nibble
 	// for each row the two registers need to be set and the other two need to be cleared
 	
-	// ledData for the matrixes are stored as a byte array of the column data
+	// ledData for the matrices are stored as a byte array of the column data
 	
 	if (muxCounter < 3)
 	{
-		ledData[3] = ((1 << muxCounter)) | ((ledMemory[9 + muxCounter] & 0b00000111)<<4); 
+		ledData[3] = ((1 << muxCounter)) | ((ledMemory[9 + muxCounter] & 0b00000111)<<4);
 		ledData[2] = 0;
 		ledData[1] = 0;
-		ledData[0] = ((1 << muxCounter)) | ((ledMemory[9 + muxCounter] & 0b00111000)<<1); 
+		ledData[0] = ((1 << muxCounter)) | ((ledMemory[9 + muxCounter] & 0b00111000)<<1);
 	}
 	else{
 		ledData[3] = 0;
@@ -137,8 +134,8 @@ ISR(TIMER3_COMPA_vect){
 
 ISR(TIMER3_COMPB_vect){
 	// Read in Buttons
-	PORTC = ~(1 << muxCounter);// set 1 bit to a 0
-	buttonMemory[muxCounter] = ~PIND >> 2;
+	PORTD = ~(1 << muxCounter) << 2;// set 1 bit to a 0
+	buttonMemory[muxCounter] = ~PINC;
 	
 }
 

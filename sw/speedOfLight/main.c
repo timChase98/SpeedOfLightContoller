@@ -122,6 +122,7 @@ int main(void)
 				{
 					printf("%d, %d\n\n", x, y);
 					setButtonLed(x, y, 1);
+					
 					/*(while(isButtonDown(x,y)){	//wait for button unpress
 						;
 					}*/
