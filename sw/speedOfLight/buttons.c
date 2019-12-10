@@ -132,10 +132,34 @@ ISR(TIMER3_COMPA_vect){
 	SPDR0 = ledData[spiByteCounter++];
 }
 
+/*
 ISR(TIMER3_COMPB_vect){
 	// Read in Buttons
+	
 	PORTD = ~(1 << muxCounter) << 2;// set 1 bit to a 0
+	PORTD = 0xFF; 
 	buttonMemory[muxCounter] = ~PINC;
+	
+}*/
+
+ISR(TIMER3_COMPB_vect){
+	/*DDRB |= 0b00111111;	// ENABLE OUTPUTS FOR LOW
+	PORTC = 0xFF; //PULLUPS
+	for(uint8_t colB = 0; colB < 6; colB++){
+		PORTD = ~(1 << colB) << 2;
+		//buttonMemory[(colB)%6] = ~PINC;
+		buttonMemory[colB] = 0xFF;
+		for(uint8_t rowB = 0; rowB < 6; rowB++){
+			PORTC = (1 << rowB);
+			buttonMemory[colB] &= (1 << rowB);
+		}
+	}*/
+	
+	PORTC = 0xFF;
+	DDRD = 0xFF;
+	DDRD &= ~(1<<(muxCounter+2));
+	buttonMemory[muxCounter] = ~PINC; 
+	DDRD = 0xFF; 
 	
 }
 
