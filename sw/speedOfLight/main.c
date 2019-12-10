@@ -5,6 +5,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#define F_CPU 8000000UL
 #include <util/delay.h>
 #include <stdlib.h>			// need RNG
 #include <stdio.h>
@@ -103,8 +104,8 @@ void init_uart(){
 int main(void)
 {
 
-	//usbQcInit();
-	//QCset12V();
+	usbQcInit();
+	QCset12V();
 	
 	buttonsInit();
 	init_uart();

@@ -95,15 +95,15 @@ ISR(TIMER3_COMPA_vect){
 	if (muxCounter < 3)
 	{
 		ledData[3] = ((1 << muxCounter)) | ((ledMemory[9 + muxCounter] & 0b00000111)<<4);
-		ledData[2] = 0;
+		ledData[0] = 0;
 		ledData[1] = 0;
-		ledData[0] = ((1 << muxCounter)) | ((ledMemory[9 + muxCounter] & 0b00111000)<<1);
+		ledData[2] = ((1 << muxCounter)) | ((ledMemory[9 + muxCounter] & 0b00111000)<<1);
 	}
 	else{
 		ledData[3] = 0;
-		ledData[2] = ((1 << (muxCounter-3))) | ((ledMemory[9 + muxCounter] & 0b00000111)<<4);
+		ledData[0] = ((1 << (muxCounter-3))) | ((ledMemory[9 + muxCounter] & 0b00000111)<<4);
 		ledData[1] = ((1 << (muxCounter-3))) | ((ledMemory[9 + muxCounter] & 0b00111000)<<1);
-		ledData[0] = 0;
+		ledData[2] = 0;
 	}
 	
 	muxCounter = (muxCounter + 1) % 6;
