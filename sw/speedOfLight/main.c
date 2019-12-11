@@ -43,7 +43,7 @@
 #define EEP_ADDR_RandomSeed_L 0x41
 
 #define EEP_ADDR_MultMax 0x50
-#define EEP_ADDR_BonusPtCount 60
+#define EEP_ADDR_BonusPtCount 0x60
 
 
 //********************** def prototypes
@@ -111,30 +111,32 @@ int main(void)
 	init_uart();
 	stdout = &mystdout;
 	
-	printf("Welcome to bartending robot OS ver 4.7B\n");
+	printf("\n\nWelcome to bartending robot OS ver 4.7B\n");
 	
 	sei();
 	
+	/*
 	while(1){							//REMOVE THIS, FOR TESTING
 		for(int x = 0; x < 6; x++){
 			for (int y = 0; y < 6; y++)
 			{
 				if (isButtonDown(x, y))
 				{
-					printf("%d, %d\n\n", x, y);
+					printf("X ");
 					setButtonLed(x, y, 1);
 					
-					/*(while(isButtonDown(x,y)){	//wait for button unpress
-						;
-					}*/
 				}else{
 					setButtonLed(x, y, 0);
+					printf("O ");
 				}
+				
 			}
+			printf("\n");
 		}
+		printf("\n");
+		_delay_ms(100);
 		
-		
-	}
+	}*/
 	
 	// initialize timer0 for audio circuit
 	DDRB |= (1 << DDB1) | (1 << DDB5); // output speaker pin B1
@@ -149,9 +151,12 @@ int main(void)
 	OCR0A = 125;
 	TIMSK0 = ( 1 << OCIE0A );
 	
-	printf("AUDIO TIMERS & PORT SET");
+	printf("AUDIO TIMERS & PORT SET\n");
 
 	//load values from eeprom
+	
+	
+
 	HighScore1P = (EEPROM_read(EEP_ADDR_HighScore1P_H) << 8) | (EEPROM_read(EEP_ADDR_HighScore1P_L));
 	HighScore2P = (EEPROM_read(EEP_ADDR_HighScore2P_H) << 8) | (EEPROM_read(EEP_ADDR_HighScore2P_L));
 	RoundTime = EEPROM_read(EEP_ADDR_RoundTime);
@@ -164,7 +169,9 @@ int main(void)
 	EEPROM_write(EEP_ADDR_RandomSeed_H, rand()%256 );
 	EEPROM_write(EEP_ADDR_RandomSeed_L, rand()%256 );
 	
-	printf("EEPROM VALUES SET");
+	printf("EEPROM VALUES SET:\n");
+	printf("HS1P: %d \t HS2P: %d \t RT: %d \t BT: %d \t MMAX: %d \t BPC: %d \n",HighScore1P, HighScore2P, RoundTime, BonusTime, MultiplierMax, BonusPointCount);
+	printf("RANDOMSEED: 0x%X%X\n\n", EEPROM_read(EEP_ADDR_RandomSeed_H), EEPROM_read(EEP_ADDR_RandomSeed_L));
 	
 	// set up timer4 for game timer
 	TCCR4A = (1 << WGM41);	// CTC mode
@@ -176,8 +183,9 @@ int main(void)
 
 	while (1)
 	{
-		printf("STARTING ATTRACT MODE");
+		printf("STARTING ATTRACT MODE\n");
 		Attractive();		// loop thru patterns until game start is pressed (TODO IMPLEMENT DEBUG PATTERN)
+		printf("STARTING GAME\n");
 		Game();
 		_delay_ms(750);
 		Bonus();
@@ -411,9 +419,10 @@ void Attractive(){
 			case 0:
 			for(uint8_t mode = 1; mode > 0; mode--){	// turn on then turn	off (add more mod 2 to repeat muliple times)
 				for(uint8_t x = 0; x < 6; x++){			// iterate each LED
-					for (uint8_t y = 0; y < 5; y++){
+					for (uint8_t y = 1; y < 6; y++){
 						setButtonLed(x, y, mode);	//setbuttonled from buttons.h
 						if( AttractCheckGameStart(100) ){
+							
 							goto EndAttract;
 						}
 
@@ -423,9 +432,9 @@ void Attractive(){
 			}
 			
 		}
-		EndAttract:
-		return;		// start the game
 	}
+	EndAttract:
+	return;		// start the game
 
 }
 
@@ -500,28 +509,31 @@ void IncrementScore(uint8_t Player, uint16_t value){
 /*const uint8_t onledsX[42] = { 0,1,2,3,3,0,1,2,3,3,0,1,2,3, // matrix of x positions for on leds
 							  1,2,3,4,4,1,2,3,4,1,1,2,3,4,	 // uses top left as 0,0, so inverted
 							  4,3,4,4,4,3,4,5,5,5,5,5,5,5};*/
-const uint8_t onledsX[42] = { 5,4,3,2,2,5,4,3,2,2,5,4,3,2,
-							  4,3,2,1,1,4,3,2,1,4,4,3,2,1,
-							  1,2,1,1,1,2,1,0,0,0,0,0,0,0};
-const uint8_t onledsY[42] = { 0,0,0,0,1,2,2,2,2,3,4,4,4,4,
-							  0,0,0,0,1,2,2,2,2,3,4,4,4,4,
-							  0,1,1,2,3,4,4,4,4,4,4,4,4,4};
+const uint8_t onledsX[33] = {3, 2, 1, 1, 3, 2, 1, 1, 3, 2, 1,
+							 4, 3, 2, 2, 4, 3, 2, 4, 4, 3, 2,
+							 2, 3, 2, 2, 2, 3, 2, 1, 0, 0, 0};
+const uint8_t onledsY[33] = {1, 1, 1, 2, 3, 3, 3, 4, 5, 5, 5,
+							 1, 1, 1, 2, 3, 3, 3, 4, 5, 5, 5,
+							 1, 2, 2, 3, 4, 5, 5, 5, 0, 0, 0};
 
 void Display321(){	//TODO ADD TONES FOR EACH DIGIT
 	
-	for(uint8_t number = 3; number >= 1; number--){
-		// turn off all leds
-		for(uint8_t i = 0; i < 3; i++){
-			setScore(i, number);
+	for(uint8_t i = 0; i < 30; i++){
+		setButtonLed(i % 6, i / 5, 0); // TODO VERIFY THIS WORKS
+	}
+	
+	for(uint8_t index = 0; index < 11; index++){
+		setButtonLed(onledsX[index], onledsY[index], 1);
+		while(!isButtonDown(Player1ButtonX,Player1ButtonY)){
+			;
 		}
-		for(uint8_t i = 0; i < 30; i++){
-			setButtonLed(i % 6, i / 5, 0); // TODO VERIFY THIS WORKS
+		while(isButtonDown(Player1ButtonX,Player1ButtonY)){
+			;
 		}
-		for(uint8_t i = 0; i < 14; i++){	//
-			setButtonLed(onledsX[i + (14*number)], onledsY[i + (14*number)], 1);
-			//TODO FIX THIS
-		}
-		_delay_ms(1000);
+	}
+	
+	while(!isButtonDown(0,1)){
+		;
 	}
 }
 
@@ -537,6 +549,7 @@ uint8_t AttractCheckGameStart(uint16_t count){
 		//delay some ms between each button light and check for game start
 		if(isButtonDown(Player1ButtonX, Player1ButtonY) || isButtonDown(Player2ButtonX, Player2ButtonY)){
 			GameMode = isButtonDown(Player2ButtonX, Player2ButtonY);
+			printf("STARTING %dP mode\n", GameMode+1);
 			return 1;	// instantly return and quit waiting
 		}
 	}

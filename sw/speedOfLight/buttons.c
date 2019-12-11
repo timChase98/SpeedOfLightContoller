@@ -65,15 +65,15 @@ void tmrSetup(){
 }
 
 uint8_t isButtonDown(uint8_t x, uint8_t y){
-	return buttonMemory[y] & (1 << x); // may need to change to 1 << (5 - x) test this later
+	return buttonMemory[x] & (1 << y); // may need to change to 1 << (5 - x) test this later
 }
 
 void setButtonLed(uint8_t x, uint8_t y, uint8_t value){
 	if(value){
-		ledMemory[9 + x] |= 1 << y;
+		ledMemory[9 + y] |= 1 << x;
 		return;
 	}
-	ledMemory[9 + x] &= ~(1 << y);
+	ledMemory[9 + y] &= ~(1 << x);
 	
 }
 
@@ -154,13 +154,20 @@ ISR(TIMER3_COMPB_vect){
 			buttonMemory[colB] &= (1 << rowB);
 		}
 	}*/
-	
+	/*
 	PORTC = 0xFF;
 	DDRD = 0xFF;
 	DDRD &= ~(1<<(muxCounter+2));
 	buttonMemory[muxCounter] = ~PINC; 
 	DDRD = 0xFF; 
+	*/
 	
+	DDRD = 0xFF;
+	DDRC = 0x00;
+	
+	PORTD = ~(1<<(muxCounter+2));
+	buttonMemory[muxCounter] = ~PINC;
+	PORTD = 0xFF;
 }
 
 ISR(SPI0_STC_vect){
