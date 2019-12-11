@@ -173,6 +173,9 @@ int main(void)
 	printf("HS1P: %d \t HS2P: %d \t RT: %d \t BT: %d \t MMAX: %d \t BPC: %d \n",HighScore1P, HighScore2P, RoundTime, BonusTime, MultiplierMax, BonusPointCount);
 	printf("RANDOMSEED: 0x%X%X\n\n", EEPROM_read(EEP_ADDR_RandomSeed_H), EEPROM_read(EEP_ADDR_RandomSeed_L));
 	
+	
+	
+	
 	// set up timer4 for game timer
 	TCCR4A = (1 << WGM41);	// CTC mode
 	TCCR4B = 0;				// disable timer until game start (set to 64 prescale later in code)
@@ -210,8 +213,10 @@ int main(void)
 
 ISR(TIMER0_COMPA_vect)		// audio interrupt
 {
+	DDRB |= (1<<1);
 	switch(note_index)
 	{	//every 8ms
+		
 		case 0+1:	//0ms, 8ms on
 		ICR1 = notes[beep_index];	//1st note
 		OCR1A = notes[beep_index]/2;
@@ -234,6 +239,7 @@ ISR(TIMER0_COMPA_vect)		// audio interrupt
 		note_index = -1;
 		TCCR0B &= ~(0b101 << CS00);
 		TCNT0 = 0;
+		DDRB &= ~(1<<1);
 		break;
 	}
 	note_index += 1;
@@ -249,6 +255,7 @@ void Game(){
 
 	// game mode is set when leaving attract mode
 	Display321();
+	printf("GAME START\n");
 	
 	P1Score = 0;			// reset scores and multipliers
 	P2Score = 0;
@@ -274,6 +281,7 @@ void Game(){
 	
 	while(TimeRemaining > 0){
 
+		printf("%Ds REMAINING\n");
 		
 		setScore(1, TimeRemaining);
 		if(GameMode == 1){
@@ -349,19 +357,13 @@ void Bonus(){
 
 	// blink leds to indicate bonus round start
 
-	for(uint8_t i = 0; i < 30; i++){
-		setButtonLed(i % 6, i / 5, 1); // TODO VERIFY THIS WORKS, turn all leds on
-	}
+	clearLeds(1);
 	_delay_ms(500);
 
-	for(uint8_t i = 0; i < 30; i++){
-		setButtonLed(i % 6, i / 5, 0); // TODO VERIFY THIS WORKS, turn all leds on
-	}
+	clearLeds(0);
 	_delay_ms(500);
 
-	for(uint8_t i = 0; i < 30; i++){
-		setButtonLed(i % 6, i / 5, 1); // TODO VERIFY THIS WORKS, turn all leds on
-	}
+	clearLeds(1);
 	_delay_ms(250);
 
 	uint32_t HasPressed = 0;	// store 30 stored buttons
@@ -417,20 +419,30 @@ void Attractive(){
 		uint8_t blinkyMode = rand() % AttractPatternCount;	// todo make random, ADD DISPLAY BLANKING
 		switch(blinkyMode){	// multiple blinky modes (todo randomly pick one)
 			case 0:
-			for(uint8_t mode = 1; mode > 0; mode--){	// turn on then turn	off (add more mod 2 to repeat muliple times)
-				for(uint8_t x = 0; x < 6; x++){			// iterate each LED
-					for (uint8_t y = 1; y < 6; y++){
-						setButtonLed(x, y, mode);	//setbuttonled from buttons.h
-						if( AttractCheckGameStart(100) ){
-							
-							goto EndAttract;
+				while(1){
+					for(uint8_t y = 1; y < 6; y++){
+						for(uint8_t x = 0; x < 6; x++){
+							setButtonLed( (y%2)==0 ? x : (5-x) ,y,1);
+							if( AttractCheckGameStart(10000) ){
+								
+								goto EndAttract;
+							}
 						}
-
+						setButtonLed(Player1ButtonX, Player1ButtonY, y%2);
+						setButtonLed(Player2ButtonX, Player2ButtonY, (y+1) % 2);
+					}
+					for(uint8_t y = 1; y < 6; y++){
+						for(uint8_t x = 0; x < 6; x++){
+							setButtonLed( (y%2)==0 ? x : (5-x) ,y,0);
+							if( AttractCheckGameStart(10000) ){
+								
+								goto EndAttract;
+							}
+						}
+						setButtonLed(Player1ButtonX, Player1ButtonY, y%2);
+						setButtonLed(Player2ButtonX, Player2ButtonY,(y+1) % 2);
 					}
 				}
-				break;
-			}
-			
 		}
 	}
 	EndAttract:
@@ -440,18 +452,18 @@ void Attractive(){
 
 void ShowWinner(){
 	
-	for(uint8_t i = 0; i < 30; i++){
-		setButtonLed(i % 6, i / 5, 0); // TODO VERIFY THIS WORKS, turn all leds on
-	}								 //blank screen
+	clearLeds(0);
 	
 	if(GameMode == 0){
 		for(uint8_t count = 0; count < 8; count++){			// flash whole screen
 			setScore(0, HighScore1P);
 			setScore(2, HighScore1P);
-			
-			for(uint8_t i = 0; i < 30; i++){
-				setButtonLed(i % 6, i / 5, i%2); // TODO VERIFY THIS WORKS, turn all leds on
-			}									// TODO make checkerboard
+			printf("checkerboard");
+			for(uint8_t ledx = 0; ledx < 6; ledx++){		// set checkerboard
+				for(uint8_t ledy = 0; ledy < 6; ledy++){
+					setButtonLed(ledx, ledy, (ledx+ledy)%2 );
+				}
+			}
 			
 			_delay_ms(250);
 			setScore(0, 0);	// TODO TURN SEGMENTS OFF
@@ -518,22 +530,31 @@ const uint8_t onledsY[33] = {1, 1, 1, 2, 3, 3, 3, 4, 5, 5, 5,
 
 void Display321(){	//TODO ADD TONES FOR EACH DIGIT
 	
-	for(uint8_t i = 0; i < 30; i++){
-		setButtonLed(i % 6, i / 5, 0); // TODO VERIFY THIS WORKS
-	}
+	clearLeds(0);
 	
-	for(uint8_t index = 0; index < 11; index++){
-		setButtonLed(onledsX[index], onledsY[index], 1);
-		while(!isButtonDown(Player1ButtonX,Player1ButtonY)){
-			;
+	if(GameMode){	//light up 2p button
+		for(uint8_t i = 0; i < 8; i++){
+			setButtonLed(Player2ButtonX, Player2ButtonY, i%2);
+			_delay_ms(100);
 		}
-		while(isButtonDown(Player1ButtonX,Player1ButtonY)){
-			;
+	}else{
+		for(uint8_t i = 0; i < 8; i++){
+			setButtonLed(Player1ButtonX, Player1ButtonY, i%2);
+			_delay_ms(100);
 		}
 	}
-	
-	while(!isButtonDown(0,1)){
-		;
+
+	playChirp(2);
+	_delay_ms(650);
+	for(uint8_t count = 3; count >= 1; count--){
+		printf("%d\n", count);
+		clearLeds(0);
+		
+		for(uint8_t index = 0; index < 11; index++){
+			setButtonLed(onledsX[index + ((3-count)*11)], onledsY[index + ((3-count)*11)], 1);
+		}
+		playChirp(3-count);
+		_delay_ms(1000);
 	}
 }
 

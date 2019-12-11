@@ -81,6 +81,14 @@ void setScore(uint8_t display, uint16_t value){
 	
 }
 
+void clearLeds(uint8_t mode){
+	for(uint8_t ledx = 0; ledx < 6; ledx++){
+		for(uint8_t ledy = 0; ledy < 6; ledy++){
+			setButtonLed(ledx, ledy, mode);
+		}	
+	}
+}
+
 
 ISR(TIMER3_COMPA_vect){
 	// calculate data for led rows

@@ -14,6 +14,7 @@
 
 
 void buttonsInit();
+void clearLeds(uint8_t);
 
 void spiSetup();
 void tmrSetup();
