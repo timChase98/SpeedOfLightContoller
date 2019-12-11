@@ -64,6 +64,7 @@ uint16_t P1MultTimeT, P2MultTimeT;		// as well as "sub-seconds" (timer ticks)
 uint8_t MultiplierMax;
 uint8_t BonusPointCount;
 
+volatile uint8_t tprescale2 = 4;
 volatile uint16_t beep_index = 0;
 volatile uint16_t note_index = 0;
 const uint16_t notes[12] = {4545, 4050, 3822, 3405, 3034, 2863, 2551, 2273, 2024, 1911, 1703, 1517};
@@ -103,39 +104,25 @@ void init_uart(){
 
 int main(void)
 {
-
 	usbQcInit();
 	QCset12V();
 	
 	buttonsInit();
 	init_uart();
 	stdout = &mystdout;
-	
 	printf("\n\nWelcome to bartending robot OS ver 4.7B\n");
 	
 	sei();
-	
 	/*
-	while(1){							//REMOVE THIS, FOR TESTING
-		for(int x = 0; x < 6; x++){
-			for (int y = 0; y < 6; y++)
-			{
-				if (isButtonDown(x, y))
-				{
-					printf("X ");
-					setButtonLed(x, y, 1);
-					
-				}else{
-					setButtonLed(x, y, 0);
-					printf("O ");
-				}
-				
-			}
-			printf("\n");
-		}
-		printf("\n");
+	uint8_t i = 0;
+	while(1){
+		setScore(LEFT, i++);
+		setScore(TIMER, i);
+		//setScore(RIGHT, i);
+		setScoreSegment(8, 0x0F);
+		setScoreSegment(7, 0x10);
+		setScoreSegment(6, 0x11);
 		_delay_ms(100);
-		
 	}*/
 	
 	// initialize timer0 for audio circuit
@@ -177,8 +164,8 @@ int main(void)
 	
 	
 	// set up timer4 for game timer
-	TCCR4A = (1 << WGM41);	// CTC mode
-	TCCR4B = 0;				// disable timer until game start (set to 64 prescale later in code)
+	TCCR4B = (1 << WGM42);	// CTC mode
+	TCCR4B |= 0;				// disable timer until game start (set to 1024 prescale later in code)
 	TIMSK4 = (1 << OCIE4A);
 	OCR4A = 15625;			// set up for 1s
 
@@ -186,7 +173,7 @@ int main(void)
 
 	while (1)
 	{
-		printf("STARTING ATTRACT MODE\n");
+		printf("\n\n\nSTARTING ATTRACT MODE\n");
 		Attractive();		// loop thru patterns until game start is pressed (TODO IMPLEMENT DEBUG PATTERN)
 		printf("STARTING GAME\n");
 		Game();
@@ -246,6 +233,7 @@ ISR(TIMER0_COMPA_vect)		// audio interrupt
 }
 
 ISR(TIMER4_COMPA_vect){		// use timer 4 for decreasing game time every 1s
+	
 	if(TimeRemaining > 0){
 		TimeRemaining--;
 	}
@@ -274,14 +262,15 @@ void Game(){
 
 
 	TimeRemaining = RoundTime;
+	printf("round time %d\n", TimeRemaining);
 	TCNT4 = 0;					// reset timer
-	TCCR4B = (0b101 << CS40);	// enable timer 0 (game timer)
+	TCCR4B |= (0b101 << CS40);	// enable timer 0 (game timer)
 	
 	setScore(0, HighScore1P);	// will be replaced if 2p mode
-	
+	printf("time remaining %d\n", TimeRemaining);
 	while(TimeRemaining > 0){
 
-		printf("%Ds REMAINING\n");
+		printf("%ds REMAINING\n", TimeRemaining);
 		
 		setScore(1, TimeRemaining);
 		if(GameMode == 1){
@@ -298,12 +287,13 @@ void Game(){
 				uint8_t oldY = gameledsY[i];
 
 				do{		// move led to random DIFFERENT spot
+					printf("bad\n");
 					if(i >= 3){
-						gameledsX[i+3] = 3 + rand() % 3;
+							gameledsX[i] = 3 + rand() % 3;
 						}else{
-						gameledsX[i] = rand() % 3;
+							gameledsX[i] = rand() % 3;
 					}
-					gameledsY[i] = rand() % 5;
+					gameledsY[i] = 1 + (rand() % 5);
 
 				}while((gameledsX[i] == oldX) && (gameledsY[i] == oldY));
 
@@ -344,12 +334,17 @@ void Game(){
 		}
 		
 		
+		clearLeds(0);
+		for(uint8_t ledIndex = 0; ledIndex < 6; ledIndex++){
+			setButtonLed(gameledsX[ledIndex], gameledsY[ledIndex], 1);
+		}
+		
 		//_delay_ms(50);	// TODO maybe change this later
 
 	}
-	
+	printf("GAMa ovar\n");
 	// game is over, stop timer
-	TCCR4B = (0b000 << CS40);
+	TCCR4B &= ~(0b111 << CS40);
 	
 }
 
@@ -439,8 +434,8 @@ void Attractive(){
 								goto EndAttract;
 							}
 						}
-						setButtonLed(Player1ButtonX, Player1ButtonY, y%2);
-						setButtonLed(Player2ButtonX, Player2ButtonY,(y+1) % 2);
+						setButtonLed(Player1ButtonX, Player1ButtonY, (y+1)%2);
+						setButtonLed(Player2ButtonX, Player2ButtonY,(y) % 2);
 					}
 				}
 		}

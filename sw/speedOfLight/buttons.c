@@ -23,8 +23,8 @@ volatile uint8_t scoreDigitCounter = 0; // counter for scoreboard multiplexing
 volatile uint8_t muxCounter = 0; // multiplex row counter
 volatile uint8_t spiByteCounter = 0; // counter for SPI transfers
 
-const uint8_t sevenSegmentDecode[17] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07,
-0x7F, 0x67, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71, 0x00};
+const uint8_t sevenSegmentDecode[18] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07,
+0x7F, 0x67, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71, 0x00, 0x3E};
 
 
 void buttonsInit(){
@@ -83,8 +83,16 @@ int getButtonLed(uint8_t x, uint8_t y){
 }
 
 void setScore(uint8_t display, uint16_t value){
+	ledMemory[3*display] = value % 10;
+	ledMemory[3*display+1] = (value / 10) % 10;
+	ledMemory[3*display+2] = (value / 100) % 10;
 	
 }
+
+void setScoreSegment(uint8_t segment, uint8_t val){
+	ledMemory[segment] = val;
+}
+	
 
 void clearLeds(uint8_t mode){
 	for(uint8_t ledx = 0; ledx < 6; ledx++){
@@ -93,6 +101,7 @@ void clearLeds(uint8_t mode){
 		}	
 	}
 }
+
 
 
 ISR(TIMER3_COMPA_vect){
