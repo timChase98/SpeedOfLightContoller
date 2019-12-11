@@ -77,6 +77,11 @@ void setButtonLed(uint8_t x, uint8_t y, uint8_t value){
 	
 }
 
+int getButtonLed(uint8_t x, uint8_t y){
+		return (ledMemory[9 + y] >> x) & 0x01;
+	
+}
+
 void setScore(uint8_t display, uint16_t value){
 	
 }
