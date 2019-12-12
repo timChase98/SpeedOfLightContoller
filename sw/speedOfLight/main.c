@@ -314,9 +314,9 @@ void debugMode(){
 			setScoreSegment(TIMER1, 1);
 			setScore(LEFT, HighScore1P);
 			
-			setButtonLed(3,2,1);		// RESET score led
+			setButtonLed(2,2,1);		// RESET score led
 			
-			if(isButtonDown(3,2)){
+			if(isButtonDown(2,2)){
 				HighScore1P = 0;
 				setScore(LEFT, HighScore1P);
 				DDRB |= (1<<1);	//play reset
@@ -324,13 +324,13 @@ void debugMode(){
 				OCR1A = notes[3] / 2;
 				_delay_ms(35);
 				DDRB &= ~(1<<1);
-				while(isButtonDown(3,2))
+				while(isButtonDown(2,2))
 				{
 					//wait for unpush
 				}
 			}
 			
-			if(isButtonDown(3,4)){	//UP
+			if(isButtonDown(1,3)){	//UP
 				TCNT4 = 0;
 				HighScore1P = (HighScore1P + 1) % 1000;
 				
@@ -340,7 +340,7 @@ void debugMode(){
 				_delay_ms(15);
 				DDRB &= ~(1<<1);
 				
-				while(isButtonDown(3,4)){
+				while(isButtonDown(1,3)){
 					setScore(LEFT, HighScore1P);
 					if(TCNT4 > 6500){
 						HighScore1P = (HighScore1P + 1) % 1000;
@@ -348,7 +348,7 @@ void debugMode(){
 					}
 				}	
 			}
-			if(isButtonDown(3,5)){	//DOWN
+			if(isButtonDown(1,4)){	//DOWN
 				TCNT4 = 0;
 				HighScore1P = (HighScore1P + 999) % 1000;
 				
@@ -358,7 +358,7 @@ void debugMode(){
 				_delay_ms(15);
 				DDRB &= ~(1<<1);
 				
-				while(isButtonDown(3,5)){
+				while(isButtonDown(1,4)){
 					setScore(LEFT, HighScore1P);
 					if(TCNT4 > 6500){
 						HighScore1P = (HighScore1P + 999) % 1000;
@@ -381,9 +381,9 @@ void debugMode(){
 			setScoreSegment(TIMER1, 2);
 			setScore(LEFT, HighScore2P);
 			
-			setButtonLed(3,2,1);		// RESET score led
+			setButtonLed(2,2,1);		// RESET score led
 			
-			if(isButtonDown(3,2)){
+			if(isButtonDown(2,2)){
 				HighScore2P = 0;
 				setScore(LEFT, HighScore1P);
 				DDRB |= (1<<1);	//play reset
@@ -391,13 +391,13 @@ void debugMode(){
 				OCR1A = notes[3] / 2;
 				_delay_ms(35);
 				DDRB &= ~(1<<1);
-				while(isButtonDown(3,2))
+				while(isButtonDown(2,2))
 				{
 					//wait for unpush
 				}
 			}
 			
-			if(isButtonDown(3,4)){	//UP
+			if(isButtonDown(1,3)){	//UP
 				TCNT4 = 0;
 				HighScore2P = (HighScore2P + 1) % 1000;
 				
@@ -407,7 +407,7 @@ void debugMode(){
 				_delay_ms(15);
 				DDRB &= ~(1<<1);
 				
-				while(isButtonDown(3,4)){
+				while(isButtonDown(1,3)){
 					setScore(LEFT, HighScore2P);
 					if(TCNT4 > 6500){
 						HighScore2P = (HighScore2P + 1) % 1000;
@@ -415,7 +415,7 @@ void debugMode(){
 					}
 				}
 			}
-			if(isButtonDown(3,5)){	//DOWN
+			if(isButtonDown(1,4)){	//DOWN
 				TCNT4 = 0;
 				HighScore2P = (HighScore2P + 999) % 1000;
 				
@@ -425,7 +425,7 @@ void debugMode(){
 				_delay_ms(15);
 				DDRB &= ~(1<<1);
 				
-				while(isButtonDown(3,5)){
+				while(isButtonDown(1,4)){
 					setScore(LEFT, HighScore2P);
 					if(TCNT4 > 6500){
 						HighScore2P = (HighScore2P + 999) % 1000;
@@ -447,9 +447,9 @@ void debugMode(){
 			setScoreSegment(TIMER1, 21);
 			setScore(LEFT, RoundTime);
 			
-			setButtonLed(3,2,1);		// RESET score led
+			setButtonLed(2,2,1);		// RESET score led
 			
-			if(isButtonDown(3,2)){
+			if(isButtonDown(2,2)){
 				RoundTime = 40;
 				setScore(LEFT, RoundTime);
 				DDRB |= (1<<1);	//play reset
@@ -457,13 +457,13 @@ void debugMode(){
 				OCR1A = notes[3] / 2;
 				_delay_ms(35);
 				DDRB &= ~(1<<1);
-				while(isButtonDown(3,2))
+				while(isButtonDown(2,2))
 				{
 					//wait for unpush
 				}
 			}
 			
-			if(isButtonDown(3,4)){	//UP
+			if(isButtonDown(1,3)){	//UP
 				TCNT4 = 0;
 				RoundTime = (RoundTime + 1);
 				
@@ -473,7 +473,7 @@ void debugMode(){
 				_delay_ms(15);
 				DDRB &= ~(1<<1);
 				
-				while(isButtonDown(3,4)){
+				while(isButtonDown(1,3)){
 					setScore(LEFT, RoundTime);
 					if(TCNT4 > 6500){
 						RoundTime = (RoundTime + 1);
@@ -481,7 +481,7 @@ void debugMode(){
 					}
 				}
 			}
-			if(isButtonDown(3,5)){	//DOWN
+			if(isButtonDown(1,4)){	//DOWN
 				TCNT4 = 0;
 				RoundTime = (RoundTime + 255);
 				
@@ -491,7 +491,7 @@ void debugMode(){
 				_delay_ms(15);
 				DDRB &= ~(1<<1);
 				
-				while(isButtonDown(3,5)){
+				while(isButtonDown(1,4)){
 					setScore(LEFT, RoundTime);
 					if(TCNT4 > 6500){
 						RoundTime = (RoundTime + 255);
@@ -514,9 +514,9 @@ void debugMode(){
 			setScoreSegment(TIMER1, 21);
 			setScore(LEFT, BonusTime);
 			
-			setButtonLed(3,2,1);		// RESET score led
+			setButtonLed(2,2,1);		// RESET score led
 			
-			if(isButtonDown(3,2)){
+			if(isButtonDown(2,2)){
 				BonusTime = 3;
 				setScore(LEFT, BonusTime);
 				DDRB |= (1<<1);	//play reset
@@ -524,13 +524,13 @@ void debugMode(){
 				OCR1A = notes[3] / 2;
 				_delay_ms(35);
 				DDRB &= ~(1<<1);
-				while(isButtonDown(3,2))
+				while(isButtonDown(2,2))
 				{
 					//wait for unpush
 				}
 			}
 			
-			if(isButtonDown(3,4)){	//UP
+			if(isButtonDown(1,3)){	//UP
 				TCNT4 = 0;
 				BonusTime = (BonusTime + 1);
 				
@@ -540,7 +540,7 @@ void debugMode(){
 				_delay_ms(15);
 				DDRB &= ~(1<<1);
 				
-				while(isButtonDown(3,4)){
+				while(isButtonDown(1,3)){
 					setScore(LEFT, BonusTime);
 					if(TCNT4 > 6500){
 						BonusTime = (BonusTime + 1);
@@ -548,7 +548,7 @@ void debugMode(){
 					}
 				}
 			}
-			if(isButtonDown(3,5)){	//DOWN
+			if(isButtonDown(1,4)){	//DOWN
 				TCNT4 = 0;
 				BonusTime = (BonusTime + 255);
 				
@@ -558,7 +558,7 @@ void debugMode(){
 				_delay_ms(15);
 				DDRB &= ~(1<<1);
 				
-				while(isButtonDown(3,5)){
+				while(isButtonDown(1,4)){
 					setScore(LEFT, BonusTime);
 					if(TCNT4 > 6500){
 						BonusTime = (BonusTime + 255);
@@ -581,9 +581,9 @@ void debugMode(){
 			setScoreSegment(TIMER1, 0xc);
 			setScore(LEFT, MultTimeKill);
 			
-			setButtonLed(3,2,1);		// RESET score led
+			setButtonLed(2,2,1);		// RESET score led
 			
-			if(isButtonDown(3,2)){
+			if(isButtonDown(2,2)){
 				MultTimeKill = 999;
 				setScore(LEFT, MultTimeKill);
 				DDRB |= (1<<1);	//play reset
@@ -591,13 +591,13 @@ void debugMode(){
 				OCR1A = notes[3] / 2;
 				_delay_ms(35);
 				DDRB &= ~(1<<1);
-				while(isButtonDown(3,2))
+				while(isButtonDown(2,2))
 				{
 					//wait for unpush
 				}
 			}
 			
-			if(isButtonDown(3,4)){	//UP
+			if(isButtonDown(1,3)){	//UP
 				TCNT4 = 0;
 				MultTimeKill = (MultTimeKill + 1) % 1000;
 				
@@ -607,7 +607,7 @@ void debugMode(){
 				_delay_ms(15);
 				DDRB &= ~(1<<1);
 				
-				while(isButtonDown(3,4)){
+				while(isButtonDown(1,3)){
 					setScore(LEFT, MultTimeKill);
 					if(TCNT4 > 6500){
 						MultTimeKill = (MultTimeKill + 1) % 1000;
@@ -615,7 +615,7 @@ void debugMode(){
 					}
 				}
 			}
-			if(isButtonDown(3,5)){	//DOWN
+			if(isButtonDown(1,4)){	//DOWN
 				TCNT4 = 0;
 				MultTimeKill = (MultTimeKill + 999) % 1000;
 				
@@ -625,7 +625,7 @@ void debugMode(){
 				_delay_ms(15);
 				DDRB &= ~(1<<1);
 				
-				while(isButtonDown(3,5)){
+				while(isButtonDown(1,4)){
 					setScore(LEFT, MultTimeKill);
 					if(TCNT4 > 6500){
 						MultTimeKill = (MultTimeKill + 999) % 1000;
@@ -649,9 +649,9 @@ void debugMode(){
 			setScoreSegment(TIMER1, 5);
 			setScore(LEFT, BonusPointCount);
 			
-			setButtonLed(3,2,1);		// RESET score led
+			setButtonLed(2,2,1);		// RESET score led
 			
-			if(isButtonDown(3,2)){
+			if(isButtonDown(2,2)){
 				BonusPointCount = 2;
 				setScore(LEFT, BonusPointCount);
 				DDRB |= (1<<1);	//play reset
@@ -659,13 +659,13 @@ void debugMode(){
 				OCR1A = notes[3] / 2;
 				_delay_ms(35);
 				DDRB &= ~(1<<1);
-				while(isButtonDown(3,2))
+				while(isButtonDown(2,2))
 				{
 					//wait for unpush
 				}
 			}
 			
-			if(isButtonDown(3,4)){	//UP
+			if(isButtonDown(1,3)){	//UP
 				TCNT4 = 0;
 				BonusPointCount = (BonusPointCount + 1);
 				
@@ -675,7 +675,7 @@ void debugMode(){
 				_delay_ms(15);
 				DDRB &= ~(1<<1);
 				
-				while(isButtonDown(3,4)){
+				while(isButtonDown(1,3)){
 					setScore(LEFT, BonusPointCount);
 					if(TCNT4 > 6500){
 						BonusPointCount = (BonusPointCount + 1);
@@ -683,7 +683,7 @@ void debugMode(){
 					}
 				}
 			}
-			if(isButtonDown(3,5)){	//DOWN
+			if(isButtonDown(1,4)){	//DOWN
 				TCNT4 = 0;
 				BonusPointCount = (BonusPointCount + 255);
 				
@@ -693,7 +693,7 @@ void debugMode(){
 				_delay_ms(15);
 				DDRB &= ~(1<<1);
 				
-				while(isButtonDown(3,5)){
+				while(isButtonDown(1,4)){
 					setScore(LEFT, BonusPointCount);
 					if(TCNT4 > 6500){
 						BonusPointCount = (BonusPointCount + 255);
@@ -719,7 +719,7 @@ void debugMode(){
 			
 			setScore(LEFT, SoundEnabled);
 
-			if(isButtonDown(3,4)){	//UP
+			if(isButtonDown(1,3)){	//UP
 				TCNT4 = 0;
 				SoundEnabled = (SoundEnabled + 1) % 2;
 				
@@ -729,7 +729,7 @@ void debugMode(){
 				_delay_ms(15);
 				DDRB &= ~(1<<1);
 				
-				while(isButtonDown(3,4)){
+				while(isButtonDown(1,3)){
 					setScore(LEFT, SoundEnabled);
 					if(TCNT4 > 6500){
 						SoundEnabled = (SoundEnabled + 1) % 2;
@@ -737,7 +737,7 @@ void debugMode(){
 					}
 				}
 			}
-			if(isButtonDown(3,5)){	//DOWN
+			if(isButtonDown(1,4)){	//DOWN
 				TCNT4 = 0;
 				SoundEnabled = (SoundEnabled + 1) % 2;
 				
@@ -747,7 +747,7 @@ void debugMode(){
 				_delay_ms(15);
 				DDRB &= ~(1<<1);
 				
-				while(isButtonDown(3,5)){
+				while(isButtonDown(1,4)){
 					setScore(LEFT, SoundEnabled);
 					if(TCNT4 > 6500){
 						SoundEnabled = (SoundEnabled + 1) % 2;
@@ -768,13 +768,13 @@ void debugMode(){
 
 
 
-		setButtonLed(0,5,1);	//NEXT button
-		setButtonLed(1,5,1);	//PREV button
-		setButtonLed(3,4,1);	//UP button
-		setButtonLed(3,5,1);	//DOWN button
+		setButtonLed(0,4,1);	//NEXT button
+		setButtonLed(2,4,1);	//PREV button
+		setButtonLed(1,3,1);	//UP button
+		setButtonLed(1,4,1);	//DOWN button
 		setButtonLed(0,1,1);	//CLOSE button
 		
-		if(isButtonDown(0,5)){	// goto next page
+		if(isButtonDown(0,4)){	// goto next page
 			page = (page+1) % maxpages;
 			
 			DDRB |= (1<<1);	//play page tone
@@ -783,7 +783,7 @@ void debugMode(){
 			_delay_ms(35);
 			DDRB &= ~(1<<1);
 			
-			while(isButtonDown(0,5)){
+			while(isButtonDown(0,4)){
 				;				//wait until button release
 			}
 			DDRB |= (1<<1);	//play page tone
@@ -795,7 +795,7 @@ void debugMode(){
 			clearLeds(0);
 			
 		}
-		if(isButtonDown(1,5)){	// goto next page
+		if(isButtonDown(2,4)){	// goto next page
 			page = (page + maxpages - 1) % maxpages;
 			
 			DDRB |= (1<<1);	//play page tone
@@ -804,7 +804,7 @@ void debugMode(){
 			_delay_ms(35);
 			DDRB &= ~(1<<1);
 			
-			while(isButtonDown(1,5)){
+			while(isButtonDown(2,4)){
 				;				//wait until button release
 			}
 			DDRB |= (1<<1);	//play page tone
@@ -928,13 +928,15 @@ void Game(){
 					playChirp(P1Multiplier);
 					
 					P1Multiplier = (P1Multiplier == MultiplierMax) ? MultiplierMax : (P1Multiplier + 1);
-					ticksrem = MultTimeKill*15;
-					if(TCNT4 < (0xFFFF-ticksrem)){	//means decay will happen "this" value of seconds left
-						P1MultTimeS = TimeRemaining;
+					ticksrem = 15*MultTimeKill;
+					P1MultTimeT = OCR4A - TCNT4;	// subseconds counting down
+					if(ticksrem > P1MultTimeT){		//
+						P1MultTimeS = TimeRemaining - MultiplierDecaySeconds;
+						P1MultTimeT = (OCR4A - (ticksrem - P2MultTimeT));
 						}else{
-						P1MultTimeS = TimeRemaining-MultiplierDecaySeconds; // will happen "next" second
+						P1MultTimeS = TimeRemaining;
+						P1MultTimeT = P1MultTimeT - ticksrem;	// this second, earlier
 					}
-					P1MultTimeT = (TCNT4 + ticksrem) % (OCR4A);	// tcnt and time rem reaches this and resets mult
 					
 					}else{
 					if(i >= 3){
@@ -942,30 +944,24 @@ void Game(){
 						playChirp(P2Multiplier);
 						
 						P2Multiplier = (P2Multiplier == MultiplierMax) ? MultiplierMax : (P2Multiplier + 1);
-						P2MultTimeS = TimeRemaining-MultiplierDecaySeconds;
-						P2MultTimeT = TCNT4;
 						
-						ticksrem = MultTimeKill*15;
-						if(TCNT4 < (0xFFFF-ticksrem)){	//means decay will happen "this" value of seconds left
-							P1MultTimeS = TimeRemaining;
+						ticksrem = 15*MultTimeKill;
+						P2MultTimeT = OCR4A - TCNT4;	// subseconds counting down
+						if(ticksrem > P2MultTimeT){		// 
+							P2MultTimeS = TimeRemaining - MultiplierDecaySeconds;
+							P2MultTimeT = (OCR4A - (ticksrem - P2MultTimeT));
 						}else{
-							P1MultTimeS = TimeRemaining-MultiplierDecaySeconds; // will happen "next" second
+							P2MultTimeS = TimeRemaining;
+							P2MultTimeT = P2MultTimeT - ticksrem;	// this second, earlier
 						}
-						P1MultTimeT = (TCNT4 + ticksrem) % (OCR4A);	// tcnt and time rem reaches this and resets mult
-						
 						
 						}else{
 						IncrementScore(0, P1Multiplier);
 						playChirp(P1Multiplier);
 						
 						P1Multiplier = (P1Multiplier == MultiplierMax) ? MultiplierMax : (P1Multiplier + 1);
-						ticksrem = MultTimeKill*15;
-						if(TCNT4 < (0xFFFF-ticksrem)){	//means decay will happen "this" value of seconds left
-							P1MultTimeS = TimeRemaining;
-							}else{
-							P1MultTimeS = TimeRemaining-MultiplierDecaySeconds; // will happen "next" second
-						}
-						P1MultTimeT = (TCNT4 + ticksrem) % (OCR4A);	// tcnt and time rem reaches this and resets mult
+						
+						
 						
 					}
 				}
@@ -976,15 +972,15 @@ void Game(){
 		
 		
 		if (P1Multiplier > 1){
-			printf("%d \t %d\n",TCNT4,P1MultTimeT);
-			if((TimeRemaining == P1MultTimeS) && (TCNT4 >= P1MultTimeT)){
-				p)
+			uint16_t tcountdown = OCR4A - TCNT4;
+			if((TimeRemaining == P1MultTimeS) && (tcountdown <= P1MultTimeT)){
 				P1Multiplier = 1;
 			}
 		}
 		
 		if (P2Multiplier > 1){
-			if((TimeRemaining == P2MultTimeS) && (TCNT4 >= P2MultTimeT)){
+			uint16_t tcountdown = OCR4A - TCNT4;
+			if((TimeRemaining == P2MultTimeS) && (tcountdown <= P2MultTimeT)){
 				P2Multiplier = 1;
 			}
 		}
@@ -1096,10 +1092,10 @@ void Attractive(){
 	
 	setScore(0, HighScore2P);
 	while(1){
-		uint8_t blinkyMode = rand() % AttractPatternCount;	// todo make random, ADD DISPLAY BLANKING
+		uint8_t blinkyMode = rand() % 4;	// todo make random, ADD DISPLAY BLANKING
 		switch(blinkyMode){	// multiple blinky modes (todo randomly pick one)
 			case 0:
-			while(1){
+			for(uint8_t count = 0; count < 2; count++){
 				for(uint8_t y = 1; y < 6; y++){
 					for(uint8_t x = 0; x < 6; x++){
 						setButtonLed( (y%2)==0 ? x : (5-x) ,y,1);
@@ -1115,7 +1111,6 @@ void Attractive(){
 					for(uint8_t x = 0; x < 6; x++){
 						setButtonLed( (y%2)==0 ? x : (5-x) ,y,0);
 						if( AttractCheckGameStart(600) ){
-							
 							goto EndAttract;
 						}
 					}
@@ -1123,6 +1118,69 @@ void Attractive(){
 					setButtonLed(Player2ButtonX, Player2ButtonY,(y) % 2);
 				}
 			}
+			break;
+			
+			case 1:
+			for(uint8_t count = 0; count < 216; count++){
+				
+				uint8_t x = rand()%6;
+				uint8_t y = 1+(rand()%5);
+				setButtonLed(x,y,!getButtonLed(x,y));
+				if( AttractCheckGameStart(260) ){
+					goto EndAttract;
+				}
+				
+				if(count % 12 == 0){
+					setButtonLed(Player1ButtonX, Player1ButtonY, (count/12)%2);
+					setButtonLed(Player2ButtonX, Player2ButtonY,(1+(count/12))%2);
+				}
+			}
+			break;
+			
+			
+			case 2:
+			for(uint8_t count = 0; count < 24; count++){
+				for(uint8_t y = 1; y < 6; y++){
+					for(uint8_t x = 0; x < 6; x++){
+						setButtonLed( (y%2)==0 ? x : (5-x) ,y,1);
+						
+					}
+					setButtonLed(Player1ButtonX, Player1ButtonY, y%2);
+					setButtonLed(Player2ButtonX, Player2ButtonY, (y+1) % 2);
+				}
+				if( AttractCheckGameStart(1000) ){
+					
+					goto EndAttract;
+				}
+			}
+			break;
+			
+			case 3:
+			for(uint8_t count = 0; count < 2; count++){
+				for(uint8_t x = 0; x < 6; x++){
+					for(uint8_t y = 1; y < 6; y++){
+						setButtonLed( (y%2)==0 ? x : (5-x) ,y,1);
+						if( AttractCheckGameStart(600) ){
+							
+							goto EndAttract;
+						}
+					}
+					setButtonLed(Player1ButtonX, Player1ButtonY, x%2);
+					setButtonLed(Player2ButtonX, Player2ButtonY, (x+1) % 2);
+				}
+				for(uint8_t x = 0; x < 6; x++){
+					for(uint8_t y = 1; y < 6; y++){
+						setButtonLed( (y%2)==0 ? x : (5-x) ,y,0);
+						if( AttractCheckGameStart(600) ){
+							goto EndAttract;
+						}
+					}
+					setButtonLed(Player1ButtonX, Player1ButtonY, (x+1)%2);
+					setButtonLed(Player2ButtonX, Player2ButtonY,(x) % 2);
+				}
+			}
+			break;
+			
 		}
 	}
 	EndAttract:
@@ -1140,7 +1198,7 @@ void ShowWinner(){
 	}
 	if(GameMode == 0){
 		
-		for(uint8_t count = 0; count < 12; count++){			// flash whole screen
+		for(uint8_t count = 0; count < 24; count++){			// flash whole screen
 			
 			setScore(RIGHT, HighScore1P);
 			setScore(LEFT, HighScore1P);
@@ -1162,7 +1220,7 @@ void ShowWinner(){
 		uint8_t winnerhalf = P1Score > P2Score ? 0 : 3; //index half based on winner
 		
 		clearLeds(0);
-		for(uint8_t count = 0; count < 12; count++){			// flash whole screen
+		for(uint8_t count = 0; count < 24; count++){			// flash whole screen
 			
 			if(P1Score > P2Score){
 				setScore(RIGHT, 16);
