@@ -16,6 +16,16 @@ enum ScoreDisplay {
 	LEFT = 0,
 	TIMER = 1,
 	RIGHT = 2,
+	LEFT1 = 0,
+	LEFT10 = 1,
+	LEFT100 = 2,
+	TIMER1 = 3,
+	TIMER10 = 4,
+	TIMER100 = 5,
+	RIGHT1 = 6,
+	RIGHT10 = 7,
+	RIGHT100 = 8,
+	
 };
 
 
