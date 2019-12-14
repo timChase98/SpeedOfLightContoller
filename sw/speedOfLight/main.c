@@ -1030,6 +1030,8 @@ void Bonus(){
 		
 	}
 	_delay_ms(250);
+	
+	Display321();
 
 	TimeRemaining = BonusTime;
 	
@@ -1223,11 +1225,15 @@ void ShowWinner(){
 		for(uint8_t count = 0; count < 24; count++){			// flash whole screen
 			
 			if(P1Score > P2Score){
-				setScore(RIGHT, 16);
+				setScoreSegment(RIGHT100, 16);
+				setScoreSegment(RIGHT10, 16);
+				setScoreSegment(RIGHT1, 16);
 				setScore(LEFT, P1Score);
 			}else{
 				setScore(RIGHT, P2Score);
-				setScore(LEFT, 16);
+				setScoreSegment(LEFT100, 16);
+				setScoreSegment(LEFT10, 16);
+				setScoreSegment(LEFT1, 16);
 			}
 			
 			
