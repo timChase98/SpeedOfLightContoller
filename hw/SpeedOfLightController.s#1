@@ -25277,7 +25277,7 @@ for display anodes</text>
 <text x="208.28" y="134.62" size="1.778" layer="91">+12V power
 for daughter boards</text>
 <text x="30.48" y="121.92" size="1.778" layer="91">USB QC set resistors </text>
-<text x="58.42" y="55.88" size="1.778" layer="95">LM2596</text>
+<text x="58.42" y="55.88" size="1.778" layer="95">LM2569</text>
 </plain>
 <instances>
 <instance part="P+38" gate="1" x="30.48" y="55.88" smashed="yes">

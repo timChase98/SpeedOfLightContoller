@@ -3,7 +3,7 @@
 <eagle version="9.5.1">
 <drawing>
 <settings>
-<setting alwaysvectorfont="no"/>
+<setting alwaysvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
 <grid distance="25" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="5" altunitdist="mil" altunit="mil"/>
@@ -1989,8 +1989,8 @@ Source: http://www.onsemi.com/pub_link/Collateral/MBRA340T3-D.PDF</description>
 <attribute name="SPICEPREFIX" value="R" x="26.67" y="62.865" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="VALUE" x="42.545" y="63.5" size="2" layer="27" rot="R270"/>
 </element>
-<element name="AF1" library="ECE388" package="FIDUCIAL_1MM" value="FIDUCIAL" x="1.905" y="1.905" smashed="yes"/>
-<element name="AF2" library="ECE388" package="FIDUCIAL_1MM" value="FIDUCIAL" x="60.96" y="74.295" smashed="yes"/>
+<element name="F1" library="ECE388" package="FIDUCIAL_1MM" value="FIDUCIAL" x="1.905" y="1.905" smashed="yes"/>
+<element name="F2" library="ECE388" package="FIDUCIAL_1MM" value="FIDUCIAL" x="60.96" y="74.295" smashed="yes"/>
 <element name="D1" library="tmc" package="SMA" value="SS34" x="21.59" y="46.355" smashed="yes" rot="R90">
 <attribute name="NAME" x="23.07" y="50.705" size="1.27" layer="25" ratio="10" rot="R180"/>
 <attribute name="VALUE" x="25.09" y="43.605" size="2" layer="27" ratio="10" rot="R90"/>
