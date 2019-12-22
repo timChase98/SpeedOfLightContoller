@@ -12,31 +12,29 @@
 
 // port definitons for pins being used for USB QC control 
 // (assumes both pins are on the same port)
-	#define QC_DDR DDRB 
-	#define QC_PORT PORTB
-	#define QC_DP 0
-	#define QC_DM 1
+	#define QC_DDR DDRE 
+	#define QC_PORT PORTE
+	#define QC_DP 1
+	#define QC_DM 0
 
 
 // macro definitions of pin states used for handshake and setting voltage
 // these should only be used inside of the setVoltage functions 
-	#define _dm0V() QC_PORT &= ~(1 << QC_DM); QC_DDR |= 1 << QC_DM
-
-	#define _dp600mV() QC_DDR &= ~(1 << QC_DP)
-	#define _dm600mV() QC_DDR &= ~(1 << QC_DM)
-
-	#define _dp3V3() QC_PORT |= 1 << QC_DP; QC_DDR |= 1 << QC_DP
-	#define _dm3V3() QC_PORT |= 1 << QC_DM; QC_DDR |= 1 << QC_DM
 	
 
 // prototypes 
 
 	void usbQcInit();
 	void _handshake();
-	void set12V();
-	void set5V();
-	void set9V();
+	void QCset12V();
+	void QCset5V();
+	void QCset9V();
 
+void _dm0V();
+void _dp600mV();
+void _dm600mV();
+void _dp3V3();
+void _dm3V3();
 
 
 #endif /* USBQC_H_ */
