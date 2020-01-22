@@ -78,7 +78,8 @@ uint16_t MultTimeKill;
 volatile uint8_t soundPlaying;
 volatile uint16_t beep_index = 0;
 volatile uint16_t note_index = 0;
-const uint16_t notes[12] = {4545, 4050, 3822, 3405, 3034, 2863, 2551, 2273, 2024, 1911, 1703, 1517};
+const uint16_t notes[] = {4545, 4050, 3822, 3405, 3034, 2863, 2551, 2273, 2024, 1911, 1703, 1517,
+			  1431, 1351, 1276, 1203, 1136, 1073, 1012, 956, 901, 851, 804, 758, 716, 676, 638, 602};
 
 
 void Game();
@@ -1383,4 +1384,5 @@ uint8_t EEPROM_read(uint16_t uiAddress)
 	EECR |= (1<<EERE);
 	/* Return data from Data Register */
 	return EEDR;
-}
+}
+
