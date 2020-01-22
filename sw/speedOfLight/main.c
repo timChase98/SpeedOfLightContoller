@@ -1343,7 +1343,11 @@ uint8_t AttractCheckGameStart(uint16_t count){
 						attractButtonMemory[x] |= (1 << y);
 						if(SoundEnabled){
 							DDRB |= (1<<1);	//make ticking noise
-							ICR1 = notes[rand() % 8];
+							if(y > 0){
+								ICR1 = notes[(5-x) + (6*(y-1))];
+							}else{
+								ICR1 = notes[rand() % 8];	
+							}
 							OCR1A = notes[4 + (TimeRemaining%2)] / 2;
 						}
 						_delay_ms(20);
